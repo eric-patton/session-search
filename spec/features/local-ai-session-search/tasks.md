@@ -175,6 +175,14 @@
   plus the versioned full OpenAI signer-subject allowlist, final-path-only copy
   and launch, identity revalidation, hostile redirection and retarget tests, and
   a target-machine published smoke check (feat-001/AC-18).
+- [x] T29 Replace manual result paging with a stable continuous virtual result
+  surface that exposes every blank-browse and search result through lazy
+  50-row page requests, coalesces page loads, rejects stale generations,
+  preserves selection, focus, details, and the visible anchor during background
+  refresh, and removes Previous and Next. Add the bundled multi-resolution app
+  icon, shared Claude Code and Codex provider-default arguments, exact launch
+  and copy tests, background desktop UI verification, and refreshed release
+  output (feat-001/AC-9, feat-001/AC-10, feat-001/AC-16, feat-001/AC-21).
 
 ## Parallelism self-check
 

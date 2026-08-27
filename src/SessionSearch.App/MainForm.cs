@@ -42,10 +42,12 @@ internal sealed class MainForm : Form
     private readonly AppOptions options;
     private readonly AppPerformanceTelemetry telemetry = new();
     private readonly CancellationTokenSource lifetime = new();
+    private readonly SemaphoreSlim pageLoadGate = new(2, 2);
     private readonly System.Windows.Forms.Timer searchTimer = new() { Interval = 120 };
-    private readonly System.Windows.Forms.Timer providerChangeTimer = new() { Interval = 800 };
+    private readonly System.Windows.Forms.Timer providerChangeTimer = new() { Interval = 1_500 };
     private readonly System.Windows.Forms.Timer periodicRescanTimer = new() { Interval = 300_000 };
     private readonly System.Windows.Forms.Timer idleMaintenanceTimer = new() { Interval = 5_000 };
+    private readonly System.Windows.Forms.Timer availabilityRefreshTimer = new() { Interval = 180 };
     private readonly List<FileSystemWatcher> providerWatchers = [];
     private readonly TextBox searchBox = new();
     private readonly ComboBox scopeBox = new();
@@ -67,10 +69,9 @@ internal sealed class MainForm : Form
     private readonly Button copyButton = new();
     private readonly Button sessionStarButton = new();
     private readonly Button directoryStarButton = new();
-    private readonly Button previousButton = new();
-    private readonly Button nextButton = new();
     private readonly Button rescanButton = new();
     private readonly TableLayoutPanel rootLayout = new();
+    private readonly VirtualSessionResults virtualResults = new();
 
     private SessionDatabase? database;
     private SessionSearchService? searchService;
@@ -87,17 +88,18 @@ internal sealed class MainForm : Form
     private Form? indexStatusForm;
     private TextBox? indexStatusText;
     private IndexingReport? lastIndexingReport;
-    private IReadOnlyList<SessionSearchResult> currentResults = [];
     private Dictionary<SessionIdentity, AvailabilityDecision> currentAvailability = [];
     private Font? favoriteRowFont;
-    private int currentPage;
-    private int totalResults;
+    private SearchGeneration? activeResultQuery;
+    private Icon? applicationIcon;
+    private int nextSearchGeneration;
     private int activeSearchCount;
     private bool indexingUiRunning;
     private bool rescanPending;
     private bool providerMonitoringStarted;
     private bool unmappedClaudeActivity;
     private bool reloadingFavoriteDirectories;
+    private bool restoringResultState;
     private string? selectedFavoriteDirectory;
     private bool closing;
 
@@ -115,6 +117,8 @@ internal sealed class MainForm : Form
         ForeColor = Ink;
         Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point);
         favoriteRowFont = new Font(Font, FontStyle.Bold);
+        applicationIcon = LoadApplicationIcon();
+        Icon = applicationIcon;
 
         BuildInterface();
         if (options.UiScale > 1F)
@@ -137,6 +141,7 @@ internal sealed class MainForm : Form
         providerChangeTimer.Tick += ProviderChangeTimerTick;
         periodicRescanTimer.Tick += PeriodicRescanTimerTick;
         idleMaintenanceTimer.Tick += IdleMaintenanceTimerTick;
+        availabilityRefreshTimer.Tick += AvailabilityRefreshTimerTick;
         Shown += MainFormShown;
         FormClosing += MainFormClosing;
         KeyDown += MainFormKeyDown;
@@ -171,13 +176,11 @@ internal sealed class MainForm : Form
         TableLayoutPanel layout = new()
         {
             Dock = DockStyle.Fill,
-            ColumnCount = 5,
+            ColumnCount = 3,
             RowCount = 2,
         };
         layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         layout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 150));
-        layout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 112));
-        layout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 94));
         layout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 150));
         layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 30));
         layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
@@ -206,7 +209,7 @@ internal sealed class MainForm : Form
         indexStateLabel.Cursor = Cursors.Hand;
         indexStateLabel.AccessibleDescription = "Open index health and diagnostics";
         indexStateLabel.Click += IndexStateLabelClick;
-        layout.SetColumnSpan(indexStateLabel, 4);
+        layout.SetColumnSpan(indexStateLabel, 2);
         layout.Controls.Add(indexStateLabel, 1, 0);
 
         searchBox.Dock = DockStyle.Fill;
@@ -226,26 +229,12 @@ internal sealed class MainForm : Form
         scopeBox.SelectedIndexChanged += ScopeBoxSelectedIndexChanged;
         layout.Controls.Add(scopeBox, 1, 1);
 
-        previousButton.Text = "Previous";
-        previousButton.AccessibleName = "Previous result page";
-        previousButton.Dock = DockStyle.Fill;
-        previousButton.Margin = new Padding(0, 2, 8, 0);
-        previousButton.Click += PreviousButtonClick;
-        layout.Controls.Add(previousButton, 2, 1);
-
-        nextButton.Text = "Next";
-        nextButton.AccessibleName = "Next result page";
-        nextButton.Dock = DockStyle.Fill;
-        nextButton.Margin = new Padding(0, 2, 8, 0);
-        nextButton.Click += NextButtonClick;
-        layout.Controls.Add(nextButton, 3, 1);
-
         rescanButton.Text = "Rescan";
         rescanButton.AccessibleName = "Rescan provider sessions";
         rescanButton.Dock = DockStyle.Fill;
         rescanButton.Margin = new Padding(0, 2, 0, 0);
         rescanButton.Click += RescanButtonClick;
-        layout.Controls.Add(rescanButton, 4, 1);
+        layout.Controls.Add(rescanButton, 2, 1);
         return header;
     }
 
@@ -308,6 +297,7 @@ internal sealed class MainForm : Form
         resultList.Columns.Add("Updated", 90);
         resultList.Columns.Add("State", 110);
         resultList.RetrieveVirtualItem += ResultListRetrieveVirtualItem;
+        resultList.CacheVirtualItems += ResultListCacheVirtualItems;
         resultList.ItemSelectionChanged += ResultListItemSelectionChanged;
         resultList.DoubleClick += ResultListDoubleClick;
         return resultList;
@@ -974,7 +964,6 @@ internal sealed class MainForm : Form
                 telemetry.RecordFirstMetadataReady();
                 indexStateLabel.Text =
                     $"Index: metadata ready, {value.DiscoveredSessions} sessions";
-                _ = RunSearchAsync(resetPage: false, lifetime.Token);
             }
             else
             {
@@ -995,7 +984,14 @@ internal sealed class MainForm : Form
             statusLabel.Text = report.ChangedSources == 0
                 ? "Index is current."
                 : $"Indexed {report.ChangedSources} changed sources in {report.Elapsed.TotalSeconds:0.0} seconds.";
-            await RunSearchAsync(resetPage: false, lifetime.Token);
+            if (report.ChangedSources > 0)
+            {
+                await RunSearchAsync(resetPage: false, lifetime.Token);
+            }
+            else
+            {
+                await RefreshAvailabilityAsync(lifetime.Token);
+            }
             await ReloadFavoriteDirectoriesAsync(lifetime.Token);
             await RefreshIndexStatusAsync();
         }
@@ -1021,7 +1017,8 @@ internal sealed class MainForm : Form
                 if (rescanPending)
                 {
                     rescanPending = false;
-                    _ = RunIndexingAsync();
+                    providerChangeTimer.Stop();
+                    providerChangeTimer.Start();
                 }
             }
         }
@@ -1130,22 +1127,18 @@ internal sealed class MainForm : Form
             extension.Equals(".sqlite3", StringComparison.OrdinalIgnoreCase);
     }
 
-    private async Task RunSearchAsync(bool resetPage, CancellationToken outerToken)
+    private Task RunSearchAsync(bool resetPage, CancellationToken outerToken) =>
+        resetPage || activeResultQuery is null
+            ? BeginSearchGenerationAsync(outerToken)
+            : RefreshCurrentGenerationAsync(outerToken);
+
+    private async Task BeginSearchGenerationAsync(CancellationToken outerToken)
     {
         if (searchService is null)
         {
             return;
         }
 
-        if (resetPage)
-        {
-            currentPage = 0;
-        }
-
-        activeSearch?.Cancel();
-        activeSearch?.Dispose();
-        activeSearch = CancellationTokenSource.CreateLinkedTokenSource(outerToken);
-        CancellationToken cancellationToken = activeSearch.Token;
         QueryParseResult parsed = QueryParser.Parse(searchBox.Text);
         if (!parsed.IsSuccess)
         {
@@ -1153,48 +1146,75 @@ internal sealed class MainForm : Form
             return;
         }
 
+        activeSearch?.Cancel();
+        activeSearch?.Dispose();
+        activeSearch = CancellationTokenSource.CreateLinkedTokenSource(outerToken);
+        CancellationToken cancellationToken = activeSearch.Token;
+        var query = new SearchGeneration(
+            ++nextSearchGeneration,
+            parsed.Query!,
+            SelectedScope(),
+            selectedFavoriteDirectory);
+        activeResultQuery = query;
+        virtualResults.BeginGeneration(query.Id);
+        currentAvailability = [];
+        restoringResultState = true;
+        resultList.BeginUpdate();
+        try
+        {
+            resultList.VirtualListSize = 0;
+            resultList.Invalidate();
+        }
+        finally
+        {
+            resultList.EndUpdate();
+            restoringResultState = false;
+        }
+
+        resultCountLabel.Text = "0 sessions";
+        ShowEmptyDetails();
         Interlocked.Increment(ref activeSearchCount);
         try
         {
-            SessionSearchRequest request = new(
-                parsed.Query!,
-                SelectedScope(),
-                currentPage,
-                50,
-                selectedFavoriteDirectory);
-            if (!parsed.Query!.IsBrowse)
+            if (!query.Query.IsBrowse)
             {
                 Stopwatch metadataClock = Stopwatch.StartNew();
                 SessionSearchPage metadataPage = await searchService.SearchAsync(
-                    request with { ContentMode = SearchContentMode.MetadataOnly },
+                    query.CreateRequest(0, SearchContentMode.MetadataOnly),
                     cancellationToken);
                 cancellationToken.ThrowIfCancellationRequested();
                 telemetry.RecordQuery(
                     metadataClock.Elapsed.TotalMilliseconds,
                     transcriptCapable: false);
-                ApplySearchPage(
+                ApplyResultPage(
+                    query,
+                    0,
                     metadataPage,
-                    $"Metadata ready in {metadataClock.ElapsedMilliseconds} ms. Searching transcripts.",
-                    navigationReady: false);
+                    $"Metadata ready in {metadataClock.ElapsedMilliseconds} ms. Searching transcripts.");
             }
 
             Stopwatch completeClock = Stopwatch.StartNew();
             SessionSearchPage page = await searchService.SearchAsync(
-                request,
+                query.CreateRequest(0, SearchContentMode.All),
                 cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
             telemetry.RecordQuery(
                 completeClock.Elapsed.TotalMilliseconds,
-                transcriptCapable: !parsed.Query!.IsBrowse);
+                transcriptCapable: !query.Query.IsBrowse);
             string state = page.IsPartial ? "Partial index" : "Index current";
-            ApplySearchPage(
+            ApplyResultPage(
+                query,
+                0,
                 page,
-                $"{state}. Query completed in {completeClock.ElapsedMilliseconds} ms.",
-                navigationReady: true);
+                $"{state}. Query completed in {completeClock.ElapsedMilliseconds} ms.");
             await RefreshAvailabilityAsync(cancellationToken);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
+        }
+        catch (Exception exception)
+        {
+            statusLabel.Text = $"Search stopped: {SafeError(exception)}";
         }
         finally
         {
@@ -1203,29 +1223,313 @@ internal sealed class MainForm : Form
         }
     }
 
-    private void ApplySearchPage(
-        SessionSearchPage page,
-        string status,
-        bool navigationReady)
+    private async Task RefreshCurrentGenerationAsync(CancellationToken outerToken)
     {
-        currentResults = page.Results;
-        totalResults = page.TotalCount;
-        currentAvailability = [];
-        resultList.VirtualListSize = 0;
-        resultList.VirtualListSize = currentResults.Count;
-        resultList.Invalidate();
-        resultCountLabel.Text = $"{totalResults:N0} sessions";
-        previousButton.Enabled = navigationReady && currentPage > 0;
-        nextButton.Enabled = navigationReady && ((currentPage + 1) * 50) < totalResults;
+        SearchGeneration? query = activeResultQuery;
+        SessionSearchService? service = searchService;
+        CancellationTokenSource? generationCancellation = activeSearch;
+        if (query is null || service is null || generationCancellation is null)
+        {
+            return;
+        }
+
+        using var linked = CancellationTokenSource.CreateLinkedTokenSource(
+            outerToken,
+            generationCancellation.Token);
+        CancellationToken cancellationToken = linked.Token;
+        HashSet<int> pages = [0];
+        int lastPage = virtualResults.TotalCount == 0
+            ? 0
+            : (virtualResults.TotalCount - 1) / virtualResults.PageSize;
+        foreach (int loadedPage in virtualResults.LoadedPageNumbers)
+        {
+            pages.Add(loadedPage);
+            pages.Add(Math.Max(0, loadedPage - 1));
+            pages.Add(Math.Min(lastPage, loadedPage + 1));
+        }
+
+        Interlocked.Increment(ref activeSearchCount);
+        try
+        {
+            Stopwatch clock = Stopwatch.StartNew();
+            using var refreshGate = new SemaphoreSlim(4, 4);
+            Task<(int PageNumber, SessionSearchPage Page)>[] pageTasks = pages
+                .Order()
+                .Select(async pageNumber =>
+                {
+                    await refreshGate.WaitAsync(cancellationToken);
+                    try
+                    {
+                        SessionSearchPage page = await service.SearchAsync(
+                            query.CreateRequest(pageNumber, SearchContentMode.All),
+                            cancellationToken);
+                        return (pageNumber, page);
+                    }
+                    finally
+                    {
+                        refreshGate.Release();
+                    }
+                })
+                .ToArray();
+            (int PageNumber, SessionSearchPage Page)[] refreshed = await Task.WhenAll(pageTasks);
+            cancellationToken.ThrowIfCancellationRequested();
+            if (activeResultQuery?.Id != query.Id)
+            {
+                return;
+            }
+
+            ResultListState interaction = CaptureResultListState();
+            bool changed = false;
+            IReadOnlySet<int> protectedPages = GetProtectedResultPages();
+            foreach ((int pageNumber, SessionSearchPage page) in refreshed)
+            {
+                changed |= virtualResults.ApplyPage(
+                    query.Id,
+                    pageNumber,
+                    page,
+                    protectedPages);
+            }
+
+            if (changed)
+            {
+                ApplyResultSurface(interaction);
+            }
+
+            SessionSearchPage first = refreshed.First(item => item.PageNumber == 0).Page;
+            telemetry.RecordQuery(
+                clock.Elapsed.TotalMilliseconds,
+                transcriptCapable: !query.Query.IsBrowse);
+            resultCountLabel.Text = $"{virtualResults.TotalCount:N0} sessions";
+            statusLabel.Text = first.IsPartial
+                ? "Partial index. Loaded results refreshed without moving your view."
+                : "Index current. Loaded results refreshed without moving your view.";
+            await RefreshAvailabilityAsync(cancellationToken);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+        }
+        catch (Exception exception)
+        {
+            statusLabel.Text = $"Result refresh stopped: {SafeError(exception)}";
+        }
+        finally
+        {
+            Interlocked.Decrement(ref activeSearchCount);
+            ScheduleIdleMaintenance();
+        }
+    }
+
+    private void ApplyResultPage(
+        SearchGeneration query,
+        int pageNumber,
+        SessionSearchPage page,
+        string status)
+    {
+        if (activeResultQuery?.Id != query.Id)
+        {
+            return;
+        }
+
+        ResultListState interaction = CaptureResultListState();
+        bool changed = virtualResults.ApplyPage(
+            query.Id,
+            pageNumber,
+            page,
+            GetProtectedResultPages());
+        if (changed)
+        {
+            ApplyResultSurface(interaction);
+        }
+
+        resultCountLabel.Text = $"{virtualResults.TotalCount:N0} sessions";
         statusLabel.Text = status;
-        if (currentResults.Count > 0)
+        if (pageNumber == 0 && page.Results.Count > 0)
         {
             telemetry.RecordFirstUsableRows();
         }
-        else
+        else if (virtualResults.TotalCount == 0)
         {
             ShowEmptyDetails();
         }
+    }
+
+    private void ApplyResultSurface(ResultListState interaction)
+    {
+        restoringResultState = true;
+        resultList.BeginUpdate();
+        try
+        {
+            if (resultList.VirtualListSize != virtualResults.TotalCount)
+            {
+                resultList.VirtualListSize = virtualResults.TotalCount;
+            }
+
+            resultList.Invalidate();
+            RestoreResultListState(interaction);
+        }
+        finally
+        {
+            resultList.EndUpdate();
+            restoringResultState = false;
+        }
+
+        ShowSelection();
+    }
+
+    private void ApplyLazyResultPage(
+        SearchGeneration query,
+        int pageNumber,
+        SessionSearchPage page)
+    {
+        if (activeResultQuery?.Id != query.Id)
+        {
+            return;
+        }
+
+        bool sizeChanged = resultList.VirtualListSize != page.TotalCount;
+        ResultListState interaction = sizeChanged
+            ? CaptureResultListState()
+            : ResultListState.Empty;
+        bool changed = virtualResults.ApplyPage(
+            query.Id,
+            pageNumber,
+            page,
+            GetProtectedResultPages());
+        if (!changed)
+        {
+            return;
+        }
+
+        resultCountLabel.Text = $"{virtualResults.TotalCount:N0} sessions";
+        if (sizeChanged)
+        {
+            ApplyResultSurface(interaction);
+        }
+        else
+        {
+            resultList.Invalidate();
+            ShowSelection();
+        }
+    }
+
+    private HashSet<int> GetProtectedResultPages()
+    {
+        HashSet<int> pages = resultList.SelectedIndices
+            .Cast<int>()
+            .Select(index => index / virtualResults.PageSize)
+            .ToHashSet();
+        int focusedIndex = resultList.FocusedItem?.Index ?? -1;
+        if (focusedIndex >= 0)
+        {
+            pages.Add(focusedIndex / virtualResults.PageSize);
+        }
+
+        try
+        {
+            int topIndex = resultList.TopItem?.Index ?? -1;
+            if (topIndex >= 0)
+            {
+                int topPage = topIndex / virtualResults.PageSize;
+                pages.Add(topPage);
+                pages.Add(topPage + 1);
+            }
+        }
+        catch (InvalidOperationException)
+        {
+        }
+
+        return pages;
+    }
+
+    private ResultListState CaptureResultListState()
+    {
+        SessionIdentity[] selectedIdentities = resultList.SelectedIndices
+            .Cast<int>()
+            .Order()
+            .Select(index => virtualResults.TryGet(index, out SessionSearchResult? result)
+                ? result?.Session.Identity
+                : null)
+            .OfType<SessionIdentity>()
+            .ToArray();
+        int focusedIndex = resultList.FocusedItem?.Index ?? -1;
+        SessionIdentity? focusedIdentity =
+            virtualResults.TryGet(focusedIndex, out SessionSearchResult? focused)
+                ? focused?.Session.Identity
+                : null;
+        int topIndex = 0;
+        try
+        {
+            topIndex = resultList.TopItem?.Index ?? 0;
+        }
+        catch (InvalidOperationException)
+        {
+        }
+
+        SessionIdentity? topIdentity =
+            virtualResults.TryGet(topIndex, out SessionSearchResult? top)
+                ? top?.Session.Identity
+                : null;
+        return new ResultListState(
+            selectedIdentities,
+            focusedIdentity,
+            topIdentity,
+            topIndex);
+    }
+
+    private void RestoreResultListState(ResultListState state)
+    {
+        resultList.SelectedIndices.Clear();
+        foreach (SessionIdentity identity in state.SelectedIdentities)
+        {
+            int selectedIndex = virtualResults.FindIndex(identity);
+            if ((uint)selectedIndex < (uint)resultList.VirtualListSize)
+            {
+                resultList.Items[selectedIndex].Selected = true;
+            }
+        }
+
+        if (state.FocusedIdentity.HasValue)
+        {
+            int focusedIndex = virtualResults.FindIndex(state.FocusedIdentity.Value);
+            if ((uint)focusedIndex < (uint)resultList.VirtualListSize)
+            {
+                resultList.Items[focusedIndex].Focused = true;
+            }
+        }
+
+        if (resultList.VirtualListSize == 0)
+        {
+            return;
+        }
+
+        int topIndex = state.TopIdentity.HasValue
+            ? virtualResults.FindIndex(state.TopIdentity.Value)
+            : -1;
+        if (topIndex < 0)
+        {
+            topIndex = Math.Clamp(state.TopIndex, 0, resultList.VirtualListSize - 1);
+        }
+
+        try
+        {
+            resultList.TopItem = resultList.Items[topIndex];
+        }
+        catch (InvalidOperationException)
+        {
+        }
+    }
+
+    private static Icon LoadApplicationIcon()
+    {
+        using Stream? stream = typeof(MainForm).Assembly.GetManifestResourceStream(
+            "SessionSearch.App.Assets.SessionSearch.ico");
+        if (stream is null)
+        {
+            return (Icon)SystemIcons.Application.Clone();
+        }
+
+        using var icon = new Icon(stream);
+        return (Icon)icon.Clone();
     }
 
     private void ScheduleIdleMaintenance()
@@ -1267,7 +1571,7 @@ internal sealed class MainForm : Form
             return;
         }
 
-        SessionSearchResult[] snapshot = currentResults.ToArray();
+        SessionSearchResult[] snapshot = virtualResults.GetLoadedResults();
         ActivityContext activity = await CaptureActivityContextAsync(
             snapshot.Select(result => result.Session).ToArray(),
             cancellationToken);
@@ -1283,6 +1587,38 @@ internal sealed class MainForm : Form
         UpdateUnmappedClaudeWarning();
         resultList.Invalidate();
         ShowSelection();
+    }
+
+    private void ScheduleAvailabilityRefresh()
+    {
+        if (closing)
+        {
+            return;
+        }
+
+        availabilityRefreshTimer.Stop();
+        availabilityRefreshTimer.Start();
+    }
+
+    private async void AvailabilityRefreshTimerTick(object? sender, EventArgs e)
+    {
+        availabilityRefreshTimer.Stop();
+        if (closing)
+        {
+            return;
+        }
+
+        try
+        {
+            await RefreshAvailabilityAsync(lifetime.Token);
+        }
+        catch (OperationCanceledException) when (lifetime.IsCancellationRequested)
+        {
+        }
+        catch (Exception exception)
+        {
+            statusLabel.Text = $"Session state refresh stopped: {SafeError(exception)}";
+        }
     }
 
     private AvailabilityDecision EvaluateAvailability(
@@ -1435,24 +1771,6 @@ internal sealed class MainForm : Form
     private void ScopeBoxSelectedIndexChanged(object? sender, EventArgs e) =>
         _ = RunSearchAsync(resetPage: true, lifetime.Token);
 
-    private void PreviousButtonClick(object? sender, EventArgs e)
-    {
-        if (currentPage > 0)
-        {
-            currentPage--;
-            _ = RunSearchAsync(resetPage: false, lifetime.Token);
-        }
-    }
-
-    private void NextButtonClick(object? sender, EventArgs e)
-    {
-        if (((currentPage + 1) * 50) < totalResults)
-        {
-            currentPage++;
-            _ = RunSearchAsync(resetPage: false, lifetime.Token);
-        }
-    }
-
     private void RescanButtonClick(object? sender, EventArgs e) => _ = RunIndexingAsync();
 
     private void FavoriteDirectoriesSelectedIndexChanged(object? sender, EventArgs e)
@@ -1473,13 +1791,14 @@ internal sealed class MainForm : Form
         object? sender,
         RetrieveVirtualItemEventArgs e)
     {
-        if ((uint)e.ItemIndex >= (uint)currentResults.Count)
+        if (!virtualResults.TryGet(e.ItemIndex, out SessionSearchResult? result) ||
+            result is null)
         {
-            e.Item = new ListViewItem(string.Empty);
+            e.Item = CreateLoadingItem();
+            QueueVirtualPage(e.ItemIndex / virtualResults.PageSize);
             return;
         }
 
-        SessionSearchResult result = currentResults[e.ItemIndex];
         string provider = result.Session.Identity.Provider == SessionProvider.ClaudeCode
             ? "Claude Code"
             : "Codex";
@@ -1507,11 +1826,101 @@ internal sealed class MainForm : Form
         e.Item = item;
     }
 
+    private void ResultListCacheVirtualItems(object? sender, CacheVirtualItemsEventArgs e)
+    {
+        if (virtualResults.TotalCount == 0)
+        {
+            return;
+        }
+
+        int firstPage = Math.Max(0, (e.StartIndex / virtualResults.PageSize) - 1);
+        int lastPage = Math.Min(
+            (virtualResults.TotalCount - 1) / virtualResults.PageSize,
+            (e.EndIndex / virtualResults.PageSize) + 1);
+        for (int pageNumber = firstPage; pageNumber <= lastPage; pageNumber++)
+        {
+            QueueVirtualPage(pageNumber);
+        }
+    }
+
+    private static ListViewItem CreateLoadingItem()
+    {
+        ListViewItem item = new("Loading session...")
+        {
+            ForeColor = Smoke,
+            ToolTipText = "This session page is loading from the local index.",
+        };
+        item.SubItems.Add(string.Empty);
+        item.SubItems.Add(string.Empty);
+        item.SubItems.Add(string.Empty);
+        item.SubItems.Add("Loading");
+        return item;
+    }
+
+    private void QueueVirtualPage(int pageNumber)
+    {
+        SearchGeneration? query = activeResultQuery;
+        if (query is null || searchService is null || activeSearch is null ||
+            !virtualResults.TryBeginPageRequest(query.Id, pageNumber))
+        {
+            return;
+        }
+
+        _ = LoadVirtualPageAsync(query, pageNumber, activeSearch.Token);
+    }
+
+    private async Task LoadVirtualPageAsync(
+        SearchGeneration query,
+        int pageNumber,
+        CancellationToken cancellationToken)
+    {
+        Interlocked.Increment(ref activeSearchCount);
+        bool enteredGate = false;
+        try
+        {
+            await pageLoadGate.WaitAsync(cancellationToken);
+            enteredGate = true;
+            SessionSearchService? service = searchService;
+            if (service is null)
+            {
+                return;
+            }
+
+            SessionSearchPage page = await service.SearchAsync(
+                query.CreateRequest(pageNumber, SearchContentMode.All),
+                cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+            ApplyLazyResultPage(query, pageNumber, page);
+            ScheduleAvailabilityRefresh();
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+        }
+        catch (Exception exception)
+        {
+            statusLabel.Text = $"A result page could not be loaded: {SafeError(exception)}";
+        }
+        finally
+        {
+            if (enteredGate)
+            {
+                pageLoadGate.Release();
+            }
+
+            virtualResults.EndPageRequest(query.Id, pageNumber);
+            Interlocked.Decrement(ref activeSearchCount);
+            ScheduleIdleMaintenance();
+        }
+    }
+
     private void ResultListItemSelectionChanged(
         object? sender,
         ListViewItemSelectionChangedEventArgs e)
     {
-        ShowSelection();
+        if (!restoringResultState)
+        {
+            ShowSelection();
+        }
     }
 
     private void ResultListDoubleClick(object? sender, EventArgs e) => _ = OpenFocusedSessionAsync();
@@ -1637,7 +2046,6 @@ internal sealed class MainForm : Form
                 !selected.IsSessionFavorite,
                 lifetime.Token);
             await RunSearchAsync(resetPage: false, lifetime.Token);
-            RestoreSelectedSession(selected.Session.Identity);
             statusLabel.Text = selected.IsSessionFavorite
                 ? "Session favorite removed."
                 : "Session favorite saved.";
@@ -1664,7 +2072,6 @@ internal sealed class MainForm : Form
                 lifetime.Token);
             await ReloadFavoriteDirectoriesAsync(lifetime.Token);
             await RunSearchAsync(resetPage: false, lifetime.Token);
-            RestoreSelectedSession(selected.Session.Identity);
             statusLabel.Text = selected.IsDirectoryFavorite
                 ? "Directory favorite removed."
                 : "Directory favorite saved.";
@@ -1678,26 +2085,6 @@ internal sealed class MainForm : Form
     private async void CopyButtonClick(object? sender, EventArgs e)
     {
         await CopySelectionAsync();
-    }
-
-    private void RestoreSelectedSession(SessionIdentity identity)
-    {
-        int index = currentResults
-            .Select((result, position) => (result.Session.Identity, Position: position))
-            .Where(candidate => candidate.Identity == identity)
-            .Select(candidate => candidate.Position)
-            .DefaultIfEmpty(-1)
-            .First();
-        if (index < 0)
-        {
-            return;
-        }
-
-        ListViewItem item = resultList.Items[index];
-        item.Selected = true;
-        item.Focused = true;
-        resultList.EnsureVisible(index);
-        ShowSelection();
     }
 
     private async void OpenButtonClick(object? sender, EventArgs e)
@@ -1819,7 +2206,7 @@ internal sealed class MainForm : Form
             searchBox.SelectAll();
             e.SuppressKeyPress = true;
         }
-        else if (e.KeyCode == Keys.Down && searchBox.Focused && currentResults.Count > 0)
+        else if (e.KeyCode == Keys.Down && searchBox.Focused && virtualResults.TotalCount > 0)
         {
             resultList.Focus();
             resultList.Items[0].Selected = true;
@@ -1865,6 +2252,7 @@ internal sealed class MainForm : Form
         providerChangeTimer.Stop();
         periodicRescanTimer.Stop();
         idleMaintenanceTimer.Stop();
+        availabilityRefreshTimer.Stop();
         foreach (FileSystemWatcher watcher in providerWatchers)
         {
             watcher.Dispose();
@@ -1877,6 +2265,8 @@ internal sealed class MainForm : Form
         database?.DisposeAsync().AsTask().GetAwaiter().GetResult();
         favoriteRowFont?.Dispose();
         favoriteRowFont = null;
+        applicationIcon?.Dispose();
+        applicationIcon = null;
         lifetime.Dispose();
     }
 
@@ -1888,23 +2278,25 @@ internal sealed class MainForm : Form
         }
 
         int index = resultList.SelectedIndices[0];
-        return (uint)index < (uint)currentResults.Count ? currentResults[index] : null;
+        return virtualResults.TryGet(index, out SessionSearchResult? result) ? result : null;
     }
 
     private SessionSearchResult[] SelectedResults() =>
         resultList.SelectedIndices
             .Cast<int>()
             .Order()
-            .Where(index => (uint)index < (uint)currentResults.Count)
-            .Select(index => currentResults[index])
+            .Select(index => virtualResults.TryGet(index, out SessionSearchResult? result)
+                ? result
+                : null)
+            .OfType<SessionSearchResult>()
             .ToArray();
 
     private SessionSearchResult? FocusedResult()
     {
         int index = resultList.FocusedItem?.Index ?? -1;
-        if ((uint)index < (uint)currentResults.Count)
+        if (virtualResults.TryGet(index, out SessionSearchResult? focused))
         {
-            return currentResults[index];
+            return focused;
         }
 
         SessionSearchResult[] selected = SelectedResults();
@@ -2073,4 +2465,30 @@ internal sealed class MainForm : Form
     private sealed record ActivityContext(
         ClaudeLiveActivitySnapshot? ClaudeSnapshot,
         IReadOnlyDictionary<SessionIdentity, IReadOnlyList<Guid>> CodexChildren);
+
+    private sealed record ResultListState(
+        IReadOnlyList<SessionIdentity> SelectedIdentities,
+        SessionIdentity? FocusedIdentity,
+        SessionIdentity? TopIdentity,
+        int TopIndex)
+    {
+        public static ResultListState Empty { get; } = new([], null, null, 0);
+    }
+
+    private sealed record SearchGeneration(
+        int Id,
+        ParsedQuery Query,
+        SearchScope Scope,
+        string? DirectoryFilter)
+    {
+        public SessionSearchRequest CreateRequest(
+            int pageNumber,
+            SearchContentMode contentMode) => new(
+                Query,
+                Scope,
+                pageNumber,
+                50,
+                DirectoryFilter,
+                contentMode);
+    }
 }

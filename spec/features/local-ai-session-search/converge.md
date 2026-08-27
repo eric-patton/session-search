@@ -54,3 +54,41 @@ the final release path with no installer alias. No real-session UI capture was
 persisted.
 
 verdict: open 13 (missing 0, partial 13, contradicts 0, unrequested 0)
+
+## run 3 - 2026-08-27
+baseline: spec sha256:8b03a3990310 | plan sha256:d75dd0fd9304 | tasks sha256:727a822d4843
+
+implemented: AC-9, AC-21
+
+- confirmed gap-001 [partial] spec:"AC-1 provider roots and normalized ownership" -> evidence: provider-root override and fallback selection remain unproven beyond the explicit-root fixture from run 1. route: tasks T23
+- confirmed gap-002 [partial] spec:"AC-2 warm and first-run result milestones" -> evidence: the real report still lacks a warm existing-index process-start to usable-list measurement. route: tasks T24
+- confirmed gap-003 [partial] spec:"AC-3 metadata and transcript p95 latency" -> evidence: transcript p95 remains 198.35 ms against the 150 ms requirement. route: tasks T24
+- confirmed gap-004 [partial] spec:"AC-4 complete search grammar and limit matrix" -> evidence: the full numeric-guard and combined-query matrix remains incomplete. route: tasks T25
+- confirmed gap-005 [partial] spec:"AC-6 complete title and description fallback chain" -> evidence: immutable-ID fallback and exact 180-scalar provider boundaries remain incomplete. route: tasks T23
+- confirmed gap-006 [partial] spec:"AC-7 favorite persistence and rollback" -> evidence: injected favorite-save failure and visible rollback remain unproven. route: tasks T25
+- confirmed gap-007 [partial] spec:"AC-10 exact Ready-row commands for both providers" -> code:tests/SessionSearch.IntegrationTests/Windows/ResumePlannerTests.cs:52 now proves exact permission-mode ordering for both providers and line 108 proves Claude apostrophe quoting, but the complete two-provider spaces, Unicode, shell-metacharacter, and display-equals-clipboard matrix remains incomplete. route: tasks T25
+- confirmed gap-008 [partial] spec:"AC-11 complete mixed batch action matrix" -> evidence: exact permission-mode batch commands now pass, but Active and Possibly active remain incomplete in the full exact-count matrix. route: tasks T25
+- confirmed gap-009 [partial] spec:"AC-12 complete availability and unknown-record matrix" -> evidence: a first-seen unidentified record remains unproven through the full diagnostic-only workflow. route: tasks T25
+- confirmed gap-010 [partial] spec:"AC-13 complete incremental indexing matrix" -> evidence: the implementation remains sequential and the complete watcher, restart, lock, archive, and storage-limit matrix remains open. route: tasks T26
+- confirmed gap-011 [partial] spec:"AC-15 idle memory and real UI-thread responsiveness" -> evidence: the real idle check remained below 100 MB while a real WinForms UI-thread probe remains absent. route: tasks T27
+- confirmed gap-012 [partial] spec:"AC-16 narrow responsive access and full automation matrix" -> code:src/SessionSearch.App/MainForm.cs preserves result focus and selection during refresh, but narrow widths still lack the required toolbar or drawer access to collapsed surfaces. route: tasks T27
+- confirmed gap-013 [partial] spec:"AC-17 complete retry and Rescan isolation matrix" -> evidence: the full new, deleted, changed, failed, fresh-query retry, and authoritative Rescan matrix remains incomplete. route: tasks T26
+
+AC-9 verification: `ProviderResumeArgumentBuilder` is shared by structured
+launch and command formatting. Exact planner, formatter, batch, activity, and
+synthetic acceptance tests prove Claude Code uses
+`--dangerously-skip-permissions --resume <id>` and Codex uses
+`--yolo resume <id>`.
+
+AC-21 verification: `VirtualSessionResults` provides a bounded sparse page
+cache, duplicate-request coalescing, generation rejection, and identity lookup.
+`MainForm` exposes `TotalCount`, loads viewport pages, omits manual paging,
+preserves interaction state during loaded-page refresh, and bundles one icon for
+the executable and form. The 187-test Release gate passed. Background Windows
+UI Automation against the protected 3,122-session index reached row 1,000 and
+the final row of a 1,201-result query, then proved selection and the top anchor
+stable through Rescan. The published 0.2.0 executable exposed a 32-pixel shell
+icon sourced from the checked 15-frame ICO. No real-session UI capture was
+persisted in the release output.
+
+verdict: open 13 (missing 0, partial 13, contradicts 0, unrequested 0)

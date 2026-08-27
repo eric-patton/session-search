@@ -95,7 +95,17 @@ public sealed class ClaudeLiveActivityDiscoveryTests
             "Synthetic complete snapshot.");
         ClaudeLiveActivitySnapshot mappedByArguments = new(
             [],
-            [unmapped with { Arguments = ["--resume", SessionId.ToString("D")] }],
+            [
+                unmapped with
+                {
+                    Arguments =
+                    [
+                        "--dangerously-skip-permissions",
+                        "--resume",
+                        SessionId.ToString("D"),
+                    ],
+                },
+            ],
             @"C:\Tools\claude.exe",
             isComplete: true,
             "Synthetic complete snapshot.");

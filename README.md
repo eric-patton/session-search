@@ -7,6 +7,8 @@ Everything stays on this computer. The app reads provider storage without modify
 ## What it does
 
 - Shows the newest sessions first with provider, title, recent request, directory, branch, model, timestamps, and source status.
+- Exposes the complete result count through one continuous list and loads small
+  pages only as you scroll, with no manual Previous or Next controls.
 - Searches title, description, full directory, branch, model, session ID, parent transcript text, and child or subagent transcript text.
 - Publishes matching metadata immediately, then completes transcript search in the background.
 - Keeps session favorites and directory favorites independent. A directory favorite acts as a filter without replacing the search query.
@@ -14,6 +16,8 @@ Everything stays on this computer. The app reads provider storage without modify
 - Shows the exact PowerShell resume command before copying it.
 - Blocks automatic resume for active, possibly active, archived, removed, unsafe, unsupported, or otherwise unavailable sessions.
 - Exposes local timing, memory, index size, source health, and sanitized parser diagnostics through `Index status`.
+- Preserves the selected sessions, focused row, details, and visible scroll
+  anchor while background indexing refreshes loaded results.
 
 ## Requirements
 
@@ -63,13 +67,13 @@ The first launch makes metadata searchable before transcript indexing completes.
 Claude Code commands use this shape:
 
 ```powershell
-Set-Location -LiteralPath 'C:\path\to\project'; & 'C:\path\to\claude.exe' '--resume' '00000000-0000-0000-0000-000000000000'
+Set-Location -LiteralPath 'C:\path\to\project'; & 'C:\path\to\claude.exe' '--dangerously-skip-permissions' '--resume' '00000000-0000-0000-0000-000000000000'
 ```
 
 Codex commands use this shape:
 
 ```powershell
-Set-Location -LiteralPath 'C:\path\to\project'; & 'C:\path\to\codex.exe' 'resume' '00000000-0000-0000-0000-000000000000'
+Set-Location -LiteralPath 'C:\path\to\project'; & 'C:\path\to\codex.exe' '--yolo' 'resume' '00000000-0000-0000-0000-000000000000'
 ```
 
 The displayed preview and copied text are produced from the same command object. Paths use PowerShell literal quoting, including doubled apostrophes. Commands are never passed through a shell automatically. Automatic open uses structured Windows Terminal arguments.
@@ -110,7 +114,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\build.ps1 -Configu
 Publish the versioned framework-dependent ReadyToRun build:
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\publish.ps1 -Version 0.1.0
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\publish.ps1 -Version 0.2.0
 ```
 
 The publish script refuses to reuse an existing version folder and scans the completed folder before reporting success.

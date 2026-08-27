@@ -40,8 +40,12 @@ public sealed class SessionActionRouterTests
         Assert.Equal(1, result.Selection.OtherUnavailable);
         string[] lines = clipboard.Text!.Split(Environment.NewLine);
         Assert.Equal(2, lines.Length);
-        Assert.Contains("claude.exe", lines[0], StringComparison.Ordinal);
-        Assert.Contains("codex.exe", lines[1], StringComparison.Ordinal);
+        Assert.Equal(
+            "Set-Location -LiteralPath 'C:\\First'; & 'C:\\Tools\\claude.exe' '--dangerously-skip-permissions' '--resume' '11111111-1111-1111-1111-111111111111'",
+            lines[0]);
+        Assert.Equal(
+            "Set-Location -LiteralPath 'C:\\Second'; & 'C:\\Tools\\codex.exe' '--yolo' 'resume' '22222222-2222-2222-2222-222222222222'",
+            lines[1]);
         Assert.DoesNotContain("#", clipboard.Text, StringComparison.Ordinal);
     }
 

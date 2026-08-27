@@ -93,12 +93,16 @@ public sealed class SyntheticEndToEndTests
                 TestContext.Current.CancellationToken);
             Assert.True(launch.Started);
             Assert.Single(launcher.Starts);
+            string sessionId = codex.Session.Identity.SessionId.ToString("D");
+            Assert.Equal(
+                ["--yolo", "resume", sessionId],
+                plan.Arguments.TakeLast(3));
             string command = PowerShellCommandFormatter.Format(plan);
-            Assert.Contains(
-                codex.Session.Identity.SessionId.ToString("D"),
+            Assert.Contains("Set-Location -LiteralPath", command, StringComparison.Ordinal);
+            Assert.EndsWith(
+                $" '--yolo' 'resume' '{sessionId}'",
                 command,
                 StringComparison.Ordinal);
-            Assert.Contains("Set-Location -LiteralPath", command, StringComparison.Ordinal);
 
             await coordinator.ReconcileAsync(
                 progress: null,

@@ -50,11 +50,15 @@ public sealed class ResumePlannerTests
     }
 
     [Theory]
-    [InlineData(SessionProvider.ClaudeCode, "--resume")]
-    [InlineData(SessionProvider.Codex, "resume")]
+    [InlineData(
+        SessionProvider.ClaudeCode,
+        "--dangerously-skip-permissions",
+        "--resume")]
+    [InlineData(SessionProvider.Codex, "--yolo", "resume")]
     // feat-001/AC-9
     public void Feat001Ac9PlanUsesExactStructuredWindowsTerminalArguments(
         SessionProvider provider,
+        string permissionArgument,
         string resumeVerb)
     {
         var revalidator = new FakeResumePlanRevalidator();
@@ -77,6 +81,7 @@ public sealed class ResumePlannerTests
                 provider == SessionProvider.ClaudeCode
                     ? @"C:\Tools\claude.exe"
                     : @"C:\Tools\codex.exe",
+                permissionArgument,
                 resumeVerb,
                 sessionId.ToString("D"),
             ],
@@ -106,7 +111,24 @@ public sealed class ResumePlannerTests
         string command = PowerShellCommandFormatter.Format(plan);
 
         Assert.Equal(
-            "Set-Location -LiteralPath 'C:\\Eric''s Repo'; & 'C:\\Tools\\claude.exe' '--resume' '11111111-1111-1111-1111-111111111111'",
+            "Set-Location -LiteralPath 'C:\\Eric''s Repo'; & 'C:\\Tools\\claude.exe' '--dangerously-skip-permissions' '--resume' '11111111-1111-1111-1111-111111111111'",
+            command);
+    }
+
+    [Fact]
+    // feat-001/AC-10
+    public void Feat001Ac10CodexPowerShellFormatterUsesYoloBeforeResume()
+    {
+        var planner = new ResumePlanner(new FakeResumePlanRevalidator());
+        ResumePlan plan = planner.Create(CreateRequest(
+            SessionProvider.Codex,
+            Guid.Parse("22222222-2222-2222-2222-222222222222"),
+            @"C:\Repos\Project"));
+
+        string command = PowerShellCommandFormatter.Format(plan);
+
+        Assert.Equal(
+            "Set-Location -LiteralPath 'C:\\Repos\\Project'; & 'C:\\Tools\\codex.exe' '--yolo' 'resume' '22222222-2222-2222-2222-222222222222'",
             command);
     }
 

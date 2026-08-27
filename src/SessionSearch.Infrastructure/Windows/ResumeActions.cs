@@ -79,6 +79,23 @@ public sealed record ResumePlan(
     }
 }
 
+internal static class ProviderResumeArgumentBuilder
+{
+    public static string[] Build(SessionIdentity identity)
+    {
+        string sessionId = identity.SessionId.ToString("D");
+        return identity.Provider switch
+        {
+            SessionProvider.ClaudeCode =>
+                ["--dangerously-skip-permissions", "--resume", sessionId],
+            SessionProvider.Codex => ["--yolo", "resume", sessionId],
+            _ => throw new ArgumentOutOfRangeException(
+                nameof(identity),
+                "The provider is not supported."),
+        };
+    }
+}
+
 public interface IResumePlanRevalidator
 {
     bool Revalidate(ResumePlan plan, out string reason);
@@ -124,13 +141,7 @@ public sealed class ResumePlanner(IResumePlanRevalidator revalidator)
             throw new ArgumentException("The immutable session ID must be a non-empty UUID.", nameof(request));
         }
 
-        string sessionId = request.Identity.SessionId.ToString("D");
-        string[] providerArguments = request.Identity.Provider switch
-        {
-            SessionProvider.ClaudeCode => ["--resume", sessionId],
-            SessionProvider.Codex => ["resume", sessionId],
-            _ => throw new ArgumentOutOfRangeException(nameof(request), "The provider is not supported."),
-        };
+        string[] providerArguments = ProviderResumeArgumentBuilder.Build(request.Identity);
 
         var arguments = new List<string>
         {
@@ -191,13 +202,7 @@ public static class PowerShellCommandFormatter
                 nameof(command));
         }
 
-        string sessionId = command.Identity.SessionId.ToString("D");
-        string[] providerArguments = command.Identity.Provider switch
-        {
-            SessionProvider.ClaudeCode => ["--resume", sessionId],
-            SessionProvider.Codex => ["resume", sessionId],
-            _ => throw new ArgumentOutOfRangeException(nameof(command)),
-        };
+        string[] providerArguments = ProviderResumeArgumentBuilder.Build(command.Identity);
 
         return $"Set-Location -LiteralPath {Quote(command.WorkingDirectory)}; & {Quote(command.ProviderExecutable.CanonicalPath)} {string.Join(' ', providerArguments.Select(Quote))}";
     }

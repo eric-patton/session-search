@@ -164,13 +164,34 @@ local, fast, read-only index and a safe path back into the selected work.
 - And a removed non-favorite session row and its transcript index are deleted at
   successful reconciliation
 
+- **Scenario: Browse every result without losing the current work**
+
+- Given blank Browse mode or a nonblank search has more than 50 results
+- When the result surface appears
+- Then its logical row count equals the complete query total and one continuous
+  scrollbar can reach every result without Previous or Next controls
+- And only bounded 50-row pages near requested rows are loaded into the result
+  cache, duplicate page requests coalesce, and stale query generations cannot
+  replace a newer query
+- When indexing or availability changes loaded results
+- Then selected session identities, the focused session, details, and the top
+  visible session remain stable without moving input focus
+- And a selected identity that no longer exists is removed without clearing
+  other surviving selections
+- When the user intentionally changes the query, provider scope, Starred scope,
+  or favorite-directory filter
+- Then a new query generation starts at the first row
+- And the executable and main window expose the same bundled multi-resolution
+  icon for Explorer, the title bar, and taskbar pinning
+
 - **Scenario: Resume one ready session**
 
 - Given the selected session is Ready and not active
 - When the user invokes Open in terminal
 - Then exactly one Windows Terminal tab starts in the recorded existing directory
-- And the tab runs `claude --resume <session-id>` for Claude Code or
-  `codex resume <session-id>` for Codex using structured process arguments
+- And the tab runs `claude --dangerously-skip-permissions --resume <session-id>`
+  for Claude Code or `codex --yolo resume <session-id>` for Codex using
+  structured process arguments
 - And the application does not invoke a shell-interpolated command string
 
 - **Scenario: Copy one resume command**
@@ -179,6 +200,8 @@ local, fast, read-only index and a safe path back into the selected work.
 - When the user invokes Copy command
 - Then the clipboard receives an equivalent PowerShell command that selects the
   recorded directory and resumes by ID
+- And it includes the same provider permission-mode arguments in the same order
+  as direct launch
 - And spaces, apostrophes, Unicode, shell metacharacters, and provider IDs are
   quoted without changing their values
 - And the confirmation identifies the session whose command was copied
@@ -562,14 +585,18 @@ trusted identity is diagnostic-only.
   and unmapped Claude activity produces only the global warning.
 - [ ] AC-9: Single-launch tests capture process creation and prove exactly one
   Windows Terminal tab targets `-w 0`, the recorded existing starting directory,
-  the correct provider executable, and the immutable resume ID are passed as
-  structured arguments without shell interpolation. A benign real Terminal
+  the correct provider executable, and exact provider arguments
+  `--dangerously-skip-permissions --resume <session-id>` for Claude Code or
+  `--yolo resume <session-id>` for Codex are passed as structured arguments
+  without shell interpolation. A benign real Terminal
   integration check opens exactly one uniquely titled tab, verifies its actual
   working directory through a sentinel and UI Automation, and closes only that
   tab without running a provider resume command.
 - [ ] AC-10: PowerShell command tests round-trip directories and IDs containing
   spaces, apostrophes, Unicode, and shell metacharacters for both providers, and
-  the displayed command equals the clipboard command. Only Ready rows produce a
+  prove the displayed command equals the clipboard command and contains the
+  same provider permission-mode arguments and ordering as direct launch. Only
+  Ready rows produce a
   command; missing Windows Terminal and an injected launch failure preserve the
   exact Ready-row copy action. The clipboard adapter also publishes the
   best-effort history and cloud exclusion formats and never logs copied text.
@@ -637,6 +664,15 @@ trusted identity is diagnostic-only.
   Critical audit finding, and verifies SQLite FTS5, application ID, expected
   schema objects, trusted-schema-off, extension-disabled, memory-map-off,
   integrity, and reduced runtime limits before the index is used.
+- [ ] AC-21: With blank Browse mode and a nonblank query that each exceed 50
+  results, automated cache and Windows UI checks prove the virtual list count
+  equals the complete query total, rows beyond the first page and the final row
+  hydrate on demand, duplicate requests coalesce, cold cached pages stay
+  bounded, and stale generations are ignored. A background Rescan preserves the
+  selected identity, focused identity, details, and top visible identity while
+  an intentional query change returns to the first row. Previous and Next are
+  absent, loading rows cannot launch or copy, and the checked-in, managed, and
+  published executable icon includes 16, 32, 48, and 256 pixel frames.
 
 ## Known sharp edges, prototype
 
@@ -652,6 +688,9 @@ trusted identity is diagnostic-only.
   parent or source classification and require conservative top-level handling.
 - Concurrent transcript writes can end with an incomplete JSON line or replace
   a file between metadata read and content read.
+- Independent offset pages can shift while the index is actively committing a
+  changed source. Loaded pages converge at the next coalesced result refresh;
+  the live result surface is not a transactional history snapshot.
 
 ## Edge cases and errors
 

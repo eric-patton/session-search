@@ -87,7 +87,11 @@ public sealed class ActiveSessionDetectorTests
                 84,
                 @"C:\Tools\claude.exe",
                 StartTime,
-                ["--resume", Session.SessionId.ToString("D")]),
+                [
+                    "--dangerously-skip-permissions",
+                    "--resume",
+                    Session.SessionId.ToString("D"),
+                ]),
         ];
 
         ClaudeActiveSessionResult result = ClaudeActiveSessionDetector.Detect(

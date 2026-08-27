@@ -232,7 +232,10 @@ Metadata candidates and FTS candidates are merged by provider plus session ID.
 The service computes match classes 0 through 7, uses FTS5 `bm25` only for class
 7, applies the complete stable tie-break tuple, and returns at most 50 result
 models per page. Snippet lookup is a separate page-sized query. Blank search
-uses an indexed updated-time order and does not touch FTS.
+uses an indexed updated-time order and does not touch FTS. The application maps
+these bounded pages into one continuous virtual list whose logical size is the
+query total. It loads viewport pages on demand, coalesces duplicate requests,
+and uses query generations so stale completions cannot replace newer results.
 
 ### 8. Availability, favorites, and active detection
 
@@ -285,6 +288,11 @@ the resolved provider executable, and exact resume-by-ID arguments through
 `ProcessStartInfo.ArgumentList`. It sets `UseShellExecute=false` and revalidates
 directory and executable identity immediately before process creation.
 
+A shared provider-argument builder supplies both launch planning and command
+formatting. Claude Code receives `--dangerously-skip-permissions --resume
+<session-id>`. Codex receives `--yolo resume <session-id>`. This keeps direct
+launch and copied command semantics byte-for-byte aligned after quoting.
+
 Batch open deduplicates provider plus ID and executes one plan per Ready row in
 visible order. It continues after failures and returns named opened, skipped,
 and failed records. This favors simple failure isolation over one complex
@@ -315,8 +323,14 @@ window automation.
   details pane realize the flight-recorder design. Standard buttons implement
   session and directory favorite actions; glyphs are decorative companions to
   text and accessible names.
-- The result list caches only requested pages. Cancellation and a short debounce
-  prevent stale searches from replacing current results.
+- The result list caches only requested pages and exposes `TotalCount` through
+  one continuous scrollbar. Cancellation, request coalescing, and query
+  generations prevent stale searches from replacing current results.
+- Background indexing and availability updates refresh loaded data in place.
+  Selection, focused identity, details, and the visible anchor remain stable;
+  only an intentional query or scope change returns to the first row.
+- The executable and main window use one bundled multi-resolution application
+  icon suitable for Explorer and taskbar pinning.
 - A selection bar exposes Ready and skipped counts, Open ready tabs, Copy
   commands, and Clear selection.
 - A named status region announces index, clipboard, favorite, Partial search,
@@ -380,6 +394,7 @@ and transcript canaries from repository artifacts and release output.
 | feat-001/AC-18 | `LocalPathPolicy`, `TrustedExecutableResolver`, installer-alias metadata resolver, and launch revalidation; hostile root, junction, UNC, device, PATH, current-directory, shim, publisher, full signer subject, exact redirect topology, stale and nested release, final-path-only dispatch, UUID, and time-of-check fixtures |
 | feat-001/AC-19 | `AppDataSecurity`, migration runner, secure purge harness, benchmark sanitizer, and artifact scanner; DACL inheritance, rollback, sentinel absence, synthetic-only captures, and no sensitive repository artifact |
 | feat-001/AC-20 | Release scripts and SQLite bootstrap; raw-string rejection fixture, approved locked restore and audit, native SQLite capability, schema allowlist, hardening pragmas, limits, and integrity checks |
+| feat-001/AC-21 | Virtual result cache and external UI Automation process test; full logical count, demand page loading, stale-generation rejection, continuous scrolling, stable selection, stable visible anchor, and bundled executable icon inspection |
 
 Every proving test includes its qualified token in its method display name or an
 adjacent test comment. `tests/**/*.cs` is the spec validator's acceptance-token
