@@ -14,7 +14,11 @@ internal sealed class FakeWindowsPathProbe : IWindowsPathProbe
 
     public bool ReparsePoint { get; set; }
 
+    public HashSet<string> ReparsePaths { get; } = new(StringComparer.OrdinalIgnoreCase);
+
     public string? FinalPath { get; set; }
+
+    public Dictionary<string, string> FinalPaths { get; } = new(StringComparer.OrdinalIgnoreCase);
 
     public DriveType GetDriveType(string driveRoot)
     {
@@ -37,19 +41,41 @@ internal sealed class FakeWindowsPathProbe : IWindowsPathProbe
     public bool HasReparsePoint(string path)
     {
         Calls++;
-        return ReparsePoint;
+        return ReparsePaths.Count > 0
+            ? ReparsePaths.Contains(path)
+            : ReparsePoint;
     }
 
     public string GetFinalPath(string path, bool directory)
     {
         Calls++;
-        return FinalPath ?? path;
+        return FinalPaths.TryGetValue(path, out string? finalPath)
+            ? finalPath
+            : FinalPath ?? path;
+    }
+}
+
+internal sealed class FakeDirectoryRedirectReader : IDirectoryRedirectReader
+{
+    public Dictionary<string, DirectoryRedirectResolution> Redirects { get; } =
+        new(StringComparer.OrdinalIgnoreCase);
+
+    public int Calls { get; private set; }
+
+    public DirectoryRedirectResolution ReadTarget(string directoryPath)
+    {
+        Calls++;
+        return Redirects.TryGetValue(directoryPath, out DirectoryRedirectResolution? result)
+            ? result
+            : new DirectoryRedirectResolution(null, DirectoryRedirectFailure.Missing);
     }
 }
 
 internal sealed class FakeExecutableTrustVerifier : IExecutableTrustVerifier
 {
     public int Calls { get; private set; }
+
+    public List<string> Paths { get; } = [];
 
     public ExecutableTrustVerification Verification { get; set; } = new(
         true,
@@ -61,6 +87,7 @@ internal sealed class FakeExecutableTrustVerifier : IExecutableTrustVerifier
         TrustedExecutableProfile profile)
     {
         Calls++;
+        Paths.Add(canonicalPath);
         return Verification;
     }
 }

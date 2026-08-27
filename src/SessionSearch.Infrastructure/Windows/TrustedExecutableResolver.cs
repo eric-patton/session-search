@@ -14,14 +14,20 @@ public enum TrustedExecutableKind
 public sealed record TrustedExecutableProfile(
     TrustedExecutableKind Kind,
     string FileName,
-    IReadOnlyList<string> ExpectedPublishers);
+    IReadOnlyList<string> ExpectedPublishers,
+    TrustedSignerPolicy? SignerPolicy = null);
+
+public sealed record TrustedSignerPolicy(
+    string Version,
+    IReadOnlyList<string> ExpectedSubjects);
 
 public sealed record ExecutableTrustVerification(
     bool IsAuthenticodeTrusted,
     string? Publisher,
     string? FileIdentity,
     bool IsVerifiedPackageAlias = false,
-    string? Failure = null);
+    string? Failure = null,
+    string? SignerSubject = null);
 
 public interface IExecutableTrustVerifier
 {
@@ -33,7 +39,9 @@ public sealed record ResolvedExecutable(
     string CanonicalPath,
     string FileIdentity,
     string Publisher,
-    bool IsVerifiedPackageAlias);
+    bool IsVerifiedPackageAlias,
+    string? SignerSubject = null,
+    string? SourceAliasPath = null);
 
 public sealed record ExecutableResolution(
     ResolvedExecutable? Executable,
@@ -44,7 +52,8 @@ public sealed record ExecutableResolution(
 
 public sealed class TrustedExecutableResolver(
     LocalPathPolicy pathPolicy,
-    IExecutableTrustVerifier trustVerifier)
+    IExecutableTrustVerifier trustVerifier,
+    IExecutableAliasPolicy? aliasPolicy = null)
 {
     public ExecutableResolution Resolve(
         TrustedExecutableProfile profile,
@@ -56,44 +65,74 @@ public sealed class TrustedExecutableResolver(
             : new[] { explicitPath }.Concat(installedCandidates);
 
         var failures = new List<string>();
+        int candidateNumber = 0;
         foreach (string candidate in candidates.Distinct(StringComparer.OrdinalIgnoreCase))
         {
-            bool terminalAlias = profile.Kind == TrustedExecutableKind.WindowsTerminal &&
-                IsWindowsTerminalAlias(candidate);
-            LocalPathValidation validation = pathPolicy.ValidateExistingFile(
-                candidate,
-                profile.FileName,
-                allowReparsePoint: terminalAlias);
-
-            if (!validation.IsSafe)
+            candidateNumber++;
+            string? sourceAliasPath = null;
+            string canonicalPath;
+            if (aliasPolicy?.IsKnownAlias(profile, candidate) == true)
             {
-                failures.Add($"{candidate}: {validation.Failure}");
-                continue;
+                ExecutableAliasResolution alias = aliasPolicy.Resolve(profile, candidate);
+                if (!alias.IsResolved)
+                {
+                    failures.Add($"{profile.FileName} candidate {candidateNumber}: {alias.Failure}");
+                    continue;
+                }
+
+                canonicalPath = alias.CanonicalTargetPath!;
+                sourceAliasPath = alias.CanonicalAliasPath;
+            }
+            else
+            {
+                bool terminalAlias = profile.Kind == TrustedExecutableKind.WindowsTerminal &&
+                    IsWindowsTerminalAlias(candidate);
+                LocalPathValidation validation = pathPolicy.ValidateExistingFile(
+                    candidate,
+                    profile.FileName,
+                    allowReparsePoint: terminalAlias);
+
+                if (!validation.IsSafe)
+                {
+                    failures.Add($"{profile.FileName} candidate {candidateNumber}: {validation.Failure}");
+                    continue;
+                }
+
+                canonicalPath = validation.CanonicalPath!;
             }
 
             ExecutableTrustVerification verification = trustVerifier.Verify(
-                validation.CanonicalPath!,
+                canonicalPath,
                 profile);
+            bool signerMatches = sourceAliasPath is null ||
+                (profile.SignerPolicy is not null &&
+                    !string.IsNullOrWhiteSpace(verification.SignerSubject) &&
+                    profile.SignerPolicy.ExpectedSubjects.Contains(
+                        verification.SignerSubject,
+                        StringComparer.Ordinal));
             if (!verification.IsAuthenticodeTrusted ||
                 string.IsNullOrWhiteSpace(verification.Publisher) ||
                 string.IsNullOrWhiteSpace(verification.FileIdentity) ||
                 !profile.ExpectedPublishers.Contains(
                     verification.Publisher,
                     StringComparer.OrdinalIgnoreCase) ||
+                !signerMatches ||
                 (profile.Kind == TrustedExecutableKind.WindowsTerminal &&
                     !verification.IsVerifiedPackageAlias))
             {
-                failures.Add($"{candidate}: signature or publisher validation failed");
+                failures.Add($"{profile.FileName} candidate {candidateNumber}: trust validation failed");
                 continue;
             }
 
             return new ExecutableResolution(
                 new ResolvedExecutable(
                     profile,
-                    validation.CanonicalPath!,
+                    canonicalPath,
                     verification.FileIdentity,
                     verification.Publisher,
-                    verification.IsVerifiedPackageAlias),
+                    verification.IsVerifiedPackageAlias,
+                    verification.SignerSubject,
+                    sourceAliasPath),
                 string.Empty);
         }
 
@@ -106,13 +145,45 @@ public sealed class TrustedExecutableResolver(
 
     public bool Revalidate(ResolvedExecutable executable)
     {
+        if (executable.SourceAliasPath is not null)
+        {
+            if (aliasPolicy?.IsKnownAlias(executable.Profile, executable.SourceAliasPath) != true)
+            {
+                return false;
+            }
+
+            ExecutableAliasResolution alias = aliasPolicy.Resolve(
+                executable.Profile,
+                executable.SourceAliasPath);
+            if (!alias.IsResolved ||
+                !string.Equals(
+                    alias.CanonicalTargetPath,
+                    executable.CanonicalPath,
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+        }
+
         ExecutableResolution resolution = Resolve(
             executable.Profile,
             [executable.CanonicalPath]);
         return resolution.Executable is not null &&
             string.Equals(
+                resolution.Executable.CanonicalPath,
+                executable.CanonicalPath,
+                StringComparison.OrdinalIgnoreCase) &&
+            string.Equals(
                 resolution.Executable.FileIdentity,
                 executable.FileIdentity,
+                StringComparison.Ordinal) &&
+            string.Equals(
+                resolution.Executable.Publisher,
+                executable.Publisher,
+                StringComparison.Ordinal) &&
+            string.Equals(
+                resolution.Executable.SignerSubject,
+                executable.SignerSubject,
                 StringComparison.Ordinal);
     }
 

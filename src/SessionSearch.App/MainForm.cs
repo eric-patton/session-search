@@ -30,7 +30,10 @@ internal sealed class MainForm : Form
     private static readonly TrustedExecutableProfile CodexExecutableProfile = new(
         TrustedExecutableKind.Codex,
         "codex.exe",
-        ["OpenAI OpCo, LLC", "OpenAI, L.L.C."]);
+        ["OpenAI OpCo, LLC", "OpenAI, L.L.C."],
+        new TrustedSignerPolicy(
+            "codex-signer-v1",
+            ["CN=\"OpenAI OpCo, LLC\", O=\"OpenAI OpCo, LLC\", L=San Francisco, S=California, C=US"]));
     private static readonly TrustedExecutableProfile TerminalExecutableProfile = new(
         TrustedExecutableKind.WindowsTerminal,
         "wt.exe",
@@ -860,7 +863,12 @@ internal sealed class MainForm : Form
         var localPathPolicy = new LocalPathPolicy(new PhysicalWindowsPathProbe());
         var executableResolver = new TrustedExecutableResolver(
             localPathPolicy,
-            new AuthenticodeExecutableTrustVerifier());
+            new AuthenticodeExecutableTrustVerifier(),
+            new CodexInstallerAliasPolicy(
+                localPathPolicy,
+                new PhysicalDirectoryRedirectReader(),
+                userProfile,
+                localAppData));
         ResolvedExecutable? claude = ResolveInstalledExecutable(
             executableResolver,
             ClaudeExecutableProfile,

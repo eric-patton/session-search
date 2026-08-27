@@ -81,7 +81,13 @@ and continue working.
   otherwise the standard user location.
 - The prototype accepts only canonical absolute paths on a local fixed drive.
   It rejects UNC and device paths, skips reparse-point traversal, validates final
-  handle paths inside the trusted root, and never probes a rejected path.
+  handle paths inside the trusted root, and never probes a rejected path. The
+  sole provider-executable exception is the exact installed Codex alias: its two
+  expected directory redirect targets are read as metadata, the derived active
+  release executable is independently validated as reparse-free, and only that
+  final versioned path may be copied or launched. Provider roots, source paths,
+  working directories, and every arbitrary executable alias retain the blanket
+  reparse rejection.
 - Claude Code and Codex storage schemas are internal and may change across CLI
   versions. Unknown shapes are skipped with diagnostics and never guessed.
 - Resume by immutable session ID. Use the recorded working directory as the

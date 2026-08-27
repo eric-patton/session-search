@@ -23,6 +23,12 @@ Everything stays on this computer. The app reads provider storage without modify
 - Windows Terminal installed for `Open` and `Open ready tabs`. Command copy still works without Windows Terminal.
 - Provider executables and Windows Terminal must resolve to trusted, Authenticode-signed local files. The app does not launch an untrusted PATH result.
 
+The standard Codex desktop installer exposes `codex.exe` through a moving local
+alias. Session Search validates that installer's expected redirects, resolves
+the active signed release, and uses only the final versioned executable path in
+launch arguments and copied commands. Other provider executable aliases remain
+blocked.
+
 Default provider roots are `%USERPROFILE%\.claude` and `%USERPROFILE%\.codex`. `CLAUDE_CONFIG_DIR` and `CODEX_HOME` override those defaults.
 
 ## Run it

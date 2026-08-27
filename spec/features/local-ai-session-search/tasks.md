@@ -169,6 +169,12 @@
   favorites and details drawer or toolbar alternative, then repeat keyboard,
   focus-return, high-contrast, reduced-motion, and 200 percent verification
   against those surfaces (feat-001/AC-15, feat-001/AC-16).
+- [x] T28 Implement the exact official Codex installer-alias exception with
+  metadata-only validation of both expected redirects, current-release equality,
+  final release-root containment, reparse-free target validation, WinVerifyTrust
+  plus the versioned full OpenAI signer-subject allowlist, final-path-only copy
+  and launch, identity revalidation, hostile redirection and retarget tests, and
+  a target-machine published smoke check (feat-001/AC-18).
 
 ## Parallelism self-check
 

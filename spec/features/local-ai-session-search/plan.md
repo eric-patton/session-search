@@ -261,10 +261,24 @@ The UI receives a status plus allowed actions, not booleans it can contradict.
 launch. `TrustedExecutableResolver` runs before applying a session directory. It
 accepts exact-name local `.exe` files from known install roots or an explicit app
 setting only after canonical-path, fixed-drive, no-reparse, Authenticode status,
-and expected-publisher validation. Windows Terminal's user alias is accepted
-only when the matching registered Microsoft package and signed package binary
-validate. Empty or relative PATH entries, current-directory lookup, script
-shims, wrong publishers, and option-looking or non-UUID IDs are rejected.
+and expected-publisher validation. For the exact official Codex installer alias,
+the resolver reads redirect metadata without opening the alias executable. Its
+`bin` redirect must target the exact provider `current\bin` path, and `current`
+must target one immediate version directory under the known standalone releases
+root. The derived final `codex.exe` must itself be reparse-free, local,
+fixed-drive, WinVerifyTrust-valid, and signed with a subject in the versioned
+exact OpenAI allowlist. `ResolvedExecutable.CanonicalPath`, structured launch
+arguments, displayed commands, and clipboard commands use only this verified
+final versioned path, never the mutable alias. Revalidation repeats alias
+convergence, WinVerifyTrust, signer-subject, and file-identity checks before
+dispatch. Signer policy `codex-signer-v1` is defined on the application Codex
+executable profile. It compares `X509Certificate2.Subject` by ordinal equality
+and initially accepts only
+`CN="OpenAI OpCo, LLC", O="OpenAI OpCo, LLC", L=San Francisco, S=California, C=US`.
+Windows Terminal's user alias is accepted only when the matching registered
+Microsoft package and signed package binary validate. Empty or relative PATH
+entries, current-directory lookup, script shims, wrong publishers, and
+option-looking or non-UUID IDs are rejected.
 
 For one Ready row the planner adds `-w 0`, `new-tab`, the safe recorded directory,
 the resolved provider executable, and exact resume-by-ID arguments through
@@ -363,7 +377,7 @@ and transcript canaries from repository artifacts and release output.
 | feat-001/AC-15 | Benchmark harness and UI probe; protocol memory samples and bounded indexing response maximum |
 | feat-001/AC-16 | WinForms command router plus external UI Automation process test; focus order, names, status text, shortcuts, selection, overlay focus return, injected high contrast and reduced motion, responsive collapse, and 200 percent layout |
 | feat-001/AC-17 | `IndexCoordinator.RescanAsync`, fresh-query retry, and diagnostics repository; retained commits, full root reconciliation, sanitized fields, and no body leakage |
-| feat-001/AC-18 | `LocalPathPolicy`, `TrustedExecutableResolver`, and launch revalidation; hostile root, junction, UNC, device, PATH, current-directory, shim, publisher, UUID, and time-of-check fixtures |
+| feat-001/AC-18 | `LocalPathPolicy`, `TrustedExecutableResolver`, installer-alias metadata resolver, and launch revalidation; hostile root, junction, UNC, device, PATH, current-directory, shim, publisher, full signer subject, exact redirect topology, stale and nested release, final-path-only dispatch, UUID, and time-of-check fixtures |
 | feat-001/AC-19 | `AppDataSecurity`, migration runner, secure purge harness, benchmark sanitizer, and artifact scanner; DACL inheritance, rollback, sentinel absence, synthetic-only captures, and no sensitive repository artifact |
 | feat-001/AC-20 | Release scripts and SQLite bootstrap; raw-string rejection fixture, approved locked restore and audit, native SQLite capability, schema allowlist, hardening pragmas, limits, and integrity checks |
 
@@ -381,6 +395,10 @@ scan boundary.
 - Windows Terminal reports process start before a tab command fully settles in
   some cases. Treat process-creation failure as definitive and report later exit
   failures when observable; never claim the resumed CLI itself completed.
+- The prototype excludes a malicious same-user process that replaces a verified
+  provider executable between final identity revalidation and the Windows
+  loader opening it. MVP hardening should hold a non-delete-sharing file handle
+  through process creation where the Windows launch contract permits it.
 - The 100 MB target is strict for managed desktop code. Cap SQLite cache, avoid
   transcript materialization, page UI results, and measure before considering a
   native helper.

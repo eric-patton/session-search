@@ -206,6 +206,15 @@ public sealed class LocalPathPolicy(IWindowsPathProbe probe)
         }
 
         string finalCanonicalPath = finalLexical.CanonicalPath!;
+        if (expectedFileName is not null &&
+            !string.Equals(
+                Path.GetFileName(finalCanonicalPath),
+                expectedFileName,
+                StringComparison.OrdinalIgnoreCase))
+        {
+            return Failure(LocalPathFailure.InvalidCharacter, "The final executable filename is not expected.");
+        }
+
         if (trustedRoot is not null)
         {
             LocalPathValidation rootLexical = ValidateLexically(trustedRoot);

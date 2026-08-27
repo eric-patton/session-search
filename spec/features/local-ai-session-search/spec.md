@@ -440,6 +440,24 @@ runs `.cmd`, `.bat`, or PowerShell shims, or enables shell execution. Provider
 session IDs must parse as UUIDs before either direct launch or command copy.
 Directory and executable identity are revalidated immediately before dispatch.
 
+The exact Codex installer alias at
+`%LOCALAPPDATA%\Programs\OpenAI\Codex\bin\codex.exe` is the sole provider CLI
+alias exception. The resolver reads, but never executes through, its two known
+directory redirects. The installer `bin` target must be the exact
+`%USERPROFILE%\.codex\packages\standalone\current\bin` path, and `current` must
+target one immediate version directory below the standalone `releases` root.
+The derived final `codex.exe` must be local, fixed-drive, reparse-free, trusted
+by WinVerifyTrust, and signed with a subject in the versioned exact OpenAI
+signer-subject allowlist. Only that final versioned path appears in the resolved
+executable, direct process arguments, displayed command, or clipboard text.
+Signer policy `codex-signer-v1`, defined by the application executable profile,
+compares `X509Certificate2.Subject` by ordinal equality and initially accepts
+only `CN="OpenAI OpCo, LLC", O="OpenAI OpCo, LLC", L=San Francisco, S=California, C=US`.
+Dispatch revalidation repeats alias convergence, WinVerifyTrust, signer-subject,
+and file-identity checks. A signer-subject rotation requires an explicit policy
+and test update; arbitrary aliases and all provider-root, source, and
+working-directory reparse paths remain rejected.
+
 Open targets `wt.exe -w 0`, which reuses the most recently used Windows Terminal
 window and creates one when none exists. Each Ready session receives one
 `new-tab` command in visible selection order with its recorded directory and
@@ -600,7 +618,14 @@ trusted identity is diagnostic-only.
   non-fixed, root-escaping, and reparse paths before network-capable probes;
   reject current-directory, hostile-PATH, script-shim, wrong-name, unsigned, and
   wrong-publisher executables; require UUID IDs; and revalidate safe local paths
-  and signed absolute executables immediately before dispatch.
+  and signed absolute executables immediately before dispatch. Codex alias tests
+  accept only the exact installer alias with the exact `current\bin` redirect,
+  one direct current release target, a reparse-free final `codex.exe`, trusted
+  Authenticode status, an allowed full signer subject, and unchanged identity.
+  Hostile cases cover wrong alias location, redirected or extra target, nested
+  or stale release, wrong filename, arbitrary reparse executable, unsigned and
+  same-display-name wrong-signer files, alias retargeting, and final-path-only
+  command and launch dispatch.
 - [ ] AC-19: Storage security tests prove a protected current-user DACL for the
   app root, database, WAL, SHM, diagnostics, temporary and benchmark files;
   injected migration failure preserves the original usable database; secure

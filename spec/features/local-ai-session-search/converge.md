@@ -22,3 +22,35 @@ implemented: AC-5, AC-8, AC-9, AC-14, AC-18, AC-19, AC-20
 - opened gap-013 [partial] spec:"AC-17 complete retry and Rescan isolation matrix" -> code:tests/SessionSearch.IntegrationTests/Indexing/IndexRetentionTests.cs:17 and tests/SessionSearch.IntegrationTests/Search/SessionSearchServiceTests.cs:352 preserve committed data and Partial state, but do not prove the full new, deleted, changed, failed, fresh-query retry, and authoritative Rescan matrix. route: tasks T26
 
 verdict: open 13 (missing 0, partial 13, contradicts 0, unrequested 0)
+
+## run 2 - 2026-08-27
+baseline: spec sha256:4b3ed2d9817e | plan sha256:f6ea783133bf | tasks sha256:60ecff1355a0
+
+implemented: AC-18
+
+- confirmed gap-001 [partial] spec:"AC-1 provider roots and normalized ownership" -> evidence: provider-root override and fallback selection remain unproven beyond the explicit-root fixture from run 1. route: tasks T23
+- confirmed gap-002 [partial] spec:"AC-2 warm and first-run result milestones" -> evidence: the real report still lacks a warm existing-index process-start to usable-list measurement. route: tasks T24
+- confirmed gap-003 [partial] spec:"AC-3 metadata and transcript p95 latency" -> evidence: transcript p95 remains 198.35 ms against the 150 ms requirement. route: tasks T24
+- confirmed gap-004 [partial] spec:"AC-4 complete search grammar and limit matrix" -> evidence: the full numeric-guard and combined-query matrix remains incomplete. route: tasks T25
+- confirmed gap-005 [partial] spec:"AC-6 complete title and description fallback chain" -> evidence: immutable-ID fallback and exact 180-scalar provider boundaries remain incomplete. route: tasks T23
+- confirmed gap-006 [partial] spec:"AC-7 favorite persistence and rollback" -> evidence: injected favorite-save failure and visible rollback remain unproven. route: tasks T25
+- confirmed gap-007 [partial] spec:"AC-10 exact Ready-row commands for both providers" -> evidence: the complete two-provider quoting and display-equals-clipboard matrix remains incomplete; the new Codex alias proof covers only final-path dispatch. route: tasks T25
+- confirmed gap-008 [partial] spec:"AC-11 complete mixed batch action matrix" -> evidence: Active and Possibly active remain incomplete in the full exact-count matrix. route: tasks T25
+- confirmed gap-009 [partial] spec:"AC-12 complete availability and unknown-record matrix" -> evidence: a first-seen unidentified record remains unproven through the full diagnostic-only workflow. route: tasks T25
+- confirmed gap-010 [partial] spec:"AC-13 complete incremental indexing matrix" -> evidence: the implementation remains sequential and the complete watcher, restart, lock, archive, and storage-limit matrix remains open. route: tasks T26
+- confirmed gap-011 [partial] spec:"AC-15 idle memory and real UI-thread responsiveness" -> evidence: idle memory passes while a real WinForms UI-thread probe remains absent. route: tasks T27
+- confirmed gap-012 [partial] spec:"AC-16 narrow responsive access and full automation matrix" -> evidence: narrow widths still lack the required toolbar or drawer access to collapsed surfaces. route: tasks T27
+- confirmed gap-013 [partial] spec:"AC-17 complete retry and Rescan isolation matrix" -> evidence: the full new, deleted, changed, failed, fresh-query retry, and authoritative Rescan matrix remains incomplete. route: tasks T26
+
+AC-18 delta verification: `CodexInstallerAliasPolicy` reads only the exact two
+directory redirect targets and validates a direct reparse-free current release;
+`TrustedExecutableResolver` binds WinVerifyTrust, the exact signer subject, file
+identity, alias convergence, and final-path-only revalidation. The 181-test
+Release gate covers hostile redirects, nested and outside releases, arbitrary
+reparse executables, same-display-name wrong signers, retargeting, and command
+dispatch. A 0.1.1 target-machine smoke found four visible Ready Codex rows, one
+Active Codex row, zero Missing CLI rows, and a selected Ready command containing
+the final release path with no installer alias. No real-session UI capture was
+persisted.
+
+verdict: open 13 (missing 0, partial 13, contradicts 0, unrequested 0)

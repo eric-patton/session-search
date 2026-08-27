@@ -35,14 +35,15 @@ public sealed class AuthenticodeExecutableTrustVerifier : IExecutableTrustVerifi
                     Failure: $"WinVerifyTrust returned 0x{trustStatus:X8}.");
             }
 
-            string publisher = ReadPublisher(canonicalPath);
+            (string publisher, string signerSubject) = ReadSignerIdentity(canonicalPath);
             stream.Position = 0;
             string identity = Convert.ToHexString(SHA256.HashData(stream));
             return new ExecutableTrustVerification(
                 true,
                 publisher,
                 identity,
-                IsVerifiedPackageAlias: IsVerifiedTerminalPackageBinary(canonicalPath, profile));
+                IsVerifiedPackageAlias: IsVerifiedTerminalPackageBinary(canonicalPath, profile),
+                SignerSubject: signerSubject);
         }
         catch (Exception exception) when (
             exception is IOException or
@@ -76,14 +77,16 @@ public sealed class AuthenticodeExecutableTrustVerifier : IExecutableTrustVerifi
         }
     }
 
-    private static string ReadPublisher(string path)
+    private static (string Publisher, string SignerSubject) ReadSignerIdentity(string path)
     {
 #pragma warning disable SYSLIB0057
         using X509Certificate embeddedCertificate = X509Certificate.CreateFromSignedFile(path);
 #pragma warning restore SYSLIB0057
         using X509Certificate2 certificate = X509CertificateLoader.LoadCertificate(
             embeddedCertificate.GetRawCertData());
-        return certificate.GetNameInfo(X509NameType.SimpleName, forIssuer: false);
+        return (
+            certificate.GetNameInfo(X509NameType.SimpleName, forIssuer: false),
+            certificate.Subject);
     }
 
     private static bool IsVerifiedTerminalPackageBinary(

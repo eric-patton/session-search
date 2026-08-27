@@ -20,6 +20,35 @@ public sealed class ResumePlannerTests
         "wt.exe",
         ["Microsoft Corporation"]);
 
+    [Fact]
+    // feat-001/AC-9 feat-001/AC-10 feat-001/AC-18
+    public void Feat001Ac18CodexAliasProvenanceNeverAppearsInLaunchOrCopiedCommand()
+    {
+        const string alias = @"C:\Users\Eric\AppData\Local\Programs\OpenAI\Codex\bin\codex.exe";
+        const string final = @"C:\Users\Eric\.codex\packages\standalone\releases\0.149.1-x86_64-pc-windows-msvc\bin\codex.exe";
+        var planner = new ResumePlanner(new FakeResumePlanRevalidator());
+        Guid sessionId = Guid.Parse("11111111-1111-1111-1111-111111111111");
+        ResumeRequest request = CreateRequest(SessionProvider.Codex, sessionId, @"C:\Repos\Project") with
+        {
+            ProviderExecutable = new ResolvedExecutable(
+                CodexProfile,
+                final,
+                "provider-file-id",
+                CodexProfile.ExpectedPublishers[0],
+                false,
+                SourceAliasPath: alias),
+        };
+
+        ResumePlan plan = planner.Create(request);
+        System.Diagnostics.ProcessStartInfo startInfo = plan.CreateStartInfo();
+        string command = PowerShellCommandFormatter.Format(plan);
+
+        Assert.Contains(final, startInfo.ArgumentList);
+        Assert.DoesNotContain(alias, startInfo.ArgumentList);
+        Assert.Contains(final, command, StringComparison.Ordinal);
+        Assert.DoesNotContain(alias, command, StringComparison.Ordinal);
+    }
+
     [Theory]
     [InlineData(SessionProvider.ClaudeCode, "--resume")]
     [InlineData(SessionProvider.Codex, "resume")]

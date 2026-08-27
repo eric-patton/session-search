@@ -87,4 +87,22 @@ public sealed class LocalPathPolicyTests
 
         Assert.Equal(LocalPathFailure.EscapesTrustedRoot, result.Failure);
     }
+
+    [Fact]
+    // feat-001/AC-18
+    public void Feat001Ac18FinalHandlePathMustRetainTheExpectedExecutableName()
+    {
+        var probe = new FakeWindowsPathProbe
+        {
+            FinalPath = @"C:\Provider\unexpected.exe",
+        };
+        var policy = new LocalPathPolicy(probe);
+
+        LocalPathValidation result = policy.ValidateExistingFile(
+            @"C:\Provider\codex.exe",
+            "codex.exe",
+            allowReparsePoint: true);
+
+        Assert.Equal(LocalPathFailure.InvalidCharacter, result.Failure);
+    }
 }
