@@ -1,0 +1,23 @@
+{
+  "ForcedHighContrast": true,
+  "WindowWidth": 1420,
+  "WindowHeight": 860,
+  "PreviewHasValue": true,
+  "CopyEnabled": true,
+  "OpenEnabled": true,
+  "AllSixIdentityLinesVisible": true,
+  "AllRequiredPresent": true,
+  "AllRequiredFullyInside": true,
+  "RequiredControls": [
+    "Index status",
+    "Search all indexed sessions",
+    "Provider and favorite scope",
+    "Rescan provider sessions",
+    "Favorite directories",
+    "Indexed session results",
+    "Pinned tile repair",
+    "PowerShell resume command preview",
+    "Copy resume command for selected session",
+    "Open selected session in Windows Terminal"
+  ]
+}

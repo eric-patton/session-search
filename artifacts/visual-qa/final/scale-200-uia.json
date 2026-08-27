@@ -1,0 +1,22 @@
+{
+  "Scale": 2,
+  "RequestedWindow": "2840x1720",
+  "ActualWindowWidth": 2586,
+  "ActualWindowHeight": 1626,
+  "RootPaneWidth": 2564,
+  "HeaderPaneWidth": 2552,
+  "Controls": [
+    { "Name": "Index status", "Present": true, "FullyInsideWindow": true, "Right": 2529, "Bottom": 137 },
+    { "Name": "Search all indexed sessions", "Present": true, "FullyInsideWindow": true, "Right": 1493, "Bottom": 186 },
+    { "Name": "Provider and favorite scope", "Present": true, "FullyInsideWindow": true, "Right": 1793, "Bottom": 174 },
+    { "Name": "Previous result page", "Present": true, "FullyInsideWindow": true, "Right": 2025, "Bottom": 219 },
+    { "Name": "Next result page", "Present": true, "FullyInsideWindow": true, "Right": 2213, "Bottom": 219 },
+    { "Name": "Rescan provider sessions", "Present": true, "FullyInsideWindow": true, "Right": 2529, "Bottom": 219 },
+    { "Name": "Favorite directories", "Present": true, "FullyInsideWindow": true, "Right": 433, "Bottom": 1460 },
+    { "Name": "Indexed session results", "Present": true, "FullyInsideWindow": true, "Right": 1849, "Bottom": 1509 },
+    { "Name": "PowerShell resume command preview", "Present": true, "FullyInsideWindow": true, "Right": 2527, "Bottom": 1299 },
+    { "Name": "Copy resume command for selected session", "Present": true, "FullyInsideWindow": true, "Right": 2261, "Bottom": 1597 },
+    { "Name": "Open selected session in Windows Terminal", "Present": true, "FullyInsideWindow": true, "Right": 2545, "Bottom": 1597 }
+  ],
+  "AllRequiredFullyVisible": true
+}

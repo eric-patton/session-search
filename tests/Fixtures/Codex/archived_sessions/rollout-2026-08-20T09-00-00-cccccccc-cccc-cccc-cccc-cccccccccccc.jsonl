@@ -1,0 +1,2 @@
+{"timestamp":"2026-08-20T09:00:00.000Z","type":"session_meta","payload":{"id":"cccccccc-cccc-cccc-cccc-cccccccccccc","timestamp":"2026-08-20T09:00:00.000Z","cwd":"C:\\repos\\archived-fixture","originator":"codex_cli_rs","cli_version":"0.149.1","source":"cli","model_provider":"openai","session_id":"cccccccc-cccc-cccc-cccc-cccccccccccc"}}
+{"timestamp":"2026-08-20T09:00:01.000Z","type":"event_msg","payload":{"type":"user_message","message":"Archived fixture request","text_elements":[]}}

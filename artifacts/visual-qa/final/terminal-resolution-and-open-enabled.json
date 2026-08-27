@@ -1,0 +1,12 @@
+{
+  "CandidateCount": 2,
+  "HasRegisteredPackageCandidate": true,
+  "ResolverResolved": true,
+  "ResolverPublisher": "Microsoft Corporation",
+  "ResolverPackageVerified": true,
+  "OpenEnabled": true,
+  "CopyEnabled": true,
+  "PreviewHasExactSyntheticId": true,
+  "AppOpenNotInvoked": true,
+  "AppOpenNotInvokedReason": "QA charter forbids invoking Claude or Codex"
+}

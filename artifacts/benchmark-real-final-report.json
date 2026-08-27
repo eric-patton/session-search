@@ -1,0 +1,394 @@
+{
+  "schemaVersion": 5,
+  "runtimeVersion": ".NET 10.0.8",
+  "processArchitecture": "X64",
+  "logicalProcessorCount": 32,
+  "index": {
+    "discoveredSessions": 2949,
+    "completedSessions": 2949,
+    "changedSources": 6865,
+    "firstMetadataRowsRequired": 50,
+    "firstMetadataRowsObserved": 50,
+    "firstMetadataMilliseconds": 4264.913,
+    "completionMilliseconds": 68234,
+    "isPartial": false,
+    "recentDiagnosticGroups": [
+      {
+        "provider": "ClaudeCode",
+        "severity": "Information",
+        "code": "claude.unsupported-stub",
+        "count": 4
+      },
+      {
+        "provider": "ClaudeCode",
+        "severity": "Warning",
+        "code": "claude.missing-directory",
+        "count": 8
+      }
+    ]
+  },
+  "search": {
+    "warmupIterationsPerCategory": 5,
+    "measuredIterationsPerCategory": 30,
+    "totalMeasurements": 660,
+    "p50Milliseconds": 13.543,
+    "p95Milliseconds": 152.052,
+    "groups": [
+      {
+        "group": "browse",
+        "measurements": 30,
+        "p50Milliseconds": 3.536,
+        "p95Milliseconds": 3.886,
+        "partialResponses": 0
+      },
+      {
+        "group": "metadata",
+        "measurements": 270,
+        "p50Milliseconds": 6.211,
+        "p95Milliseconds": 14.678,
+        "partialResponses": 0
+      },
+      {
+        "group": "transcript",
+        "measurements": 360,
+        "p50Milliseconds": 53.982,
+        "p95Milliseconds": 198.35,
+        "partialResponses": 0
+      }
+    ],
+    "categories": [
+      {
+        "category": "recent-browse",
+        "group": "browse",
+        "measurements": 30,
+        "p50Milliseconds": 3.536,
+        "p95Milliseconds": 3.886,
+        "minimumMilliseconds": 3.224,
+        "maximumMilliseconds": 3.93,
+        "partialResponses": 0
+      },
+      {
+        "category": "provider-claude",
+        "group": "metadata",
+        "measurements": 30,
+        "p50Milliseconds": 14.656,
+        "p95Milliseconds": 16.421,
+        "minimumMilliseconds": 13.543,
+        "maximumMilliseconds": 19.839,
+        "partialResponses": 0
+      },
+      {
+        "category": "provider-codex",
+        "group": "metadata",
+        "measurements": 30,
+        "p50Milliseconds": 5.699,
+        "p95Milliseconds": 6.395,
+        "minimumMilliseconds": 5.342,
+        "maximumMilliseconds": 6.404,
+        "partialResponses": 0
+      },
+      {
+        "category": "title-common",
+        "group": "metadata",
+        "measurements": 30,
+        "p50Milliseconds": 5.955,
+        "p95Milliseconds": 7.133,
+        "minimumMilliseconds": 5.518,
+        "maximumMilliseconds": 7.161,
+        "partialResponses": 0
+      },
+      {
+        "category": "title-prefix",
+        "group": "metadata",
+        "measurements": 30,
+        "p50Milliseconds": 6.025,
+        "p95Milliseconds": 6.465,
+        "minimumMilliseconds": 5.575,
+        "maximumMilliseconds": 6.972,
+        "partialResponses": 0
+      },
+      {
+        "category": "identifier-prefix",
+        "group": "metadata",
+        "measurements": 30,
+        "p50Milliseconds": 5.395,
+        "p95Milliseconds": 5.762,
+        "minimumMilliseconds": 5.119,
+        "maximumMilliseconds": 5.806,
+        "partialResponses": 0
+      },
+      {
+        "category": "directory-drive",
+        "group": "metadata",
+        "measurements": 30,
+        "p50Milliseconds": 9.41,
+        "p95Milliseconds": 10.378,
+        "minimumMilliseconds": 8.887,
+        "maximumMilliseconds": 11.01,
+        "partialResponses": 0
+      },
+      {
+        "category": "directory-component",
+        "group": "metadata",
+        "measurements": 30,
+        "p50Milliseconds": 7.509,
+        "p95Milliseconds": 8.028,
+        "minimumMilliseconds": 6.991,
+        "maximumMilliseconds": 10.147,
+        "partialResponses": 0
+      },
+      {
+        "category": "branch-common",
+        "group": "metadata",
+        "measurements": 30,
+        "p50Milliseconds": 6.93,
+        "p95Milliseconds": 7.927,
+        "minimumMilliseconds": 6.532,
+        "maximumMilliseconds": 8.087,
+        "partialResponses": 0
+      },
+      {
+        "category": "model-common",
+        "group": "metadata",
+        "measurements": 30,
+        "p50Milliseconds": 5.738,
+        "p95Milliseconds": 6.621,
+        "minimumMilliseconds": 5.194,
+        "maximumMilliseconds": 7.184,
+        "partialResponses": 0
+      },
+      {
+        "category": "transcript-request",
+        "group": "transcript",
+        "measurements": 30,
+        "p50Milliseconds": 54.912,
+        "p95Milliseconds": 57.792,
+        "minimumMilliseconds": 53.179,
+        "maximumMilliseconds": 62.352,
+        "partialResponses": 0
+      },
+      {
+        "category": "transcript-help",
+        "group": "transcript",
+        "measurements": 30,
+        "p50Milliseconds": 111.284,
+        "p95Milliseconds": 118.601,
+        "minimumMilliseconds": 106.259,
+        "maximumMilliseconds": 118.893,
+        "partialResponses": 0
+      },
+      {
+        "category": "transcript-error",
+        "group": "transcript",
+        "measurements": 30,
+        "p50Milliseconds": 140.088,
+        "p95Milliseconds": 150.647,
+        "minimumMilliseconds": 136.834,
+        "maximumMilliseconds": 151.006,
+        "partialResponses": 0
+      },
+      {
+        "category": "transcript-code",
+        "group": "transcript",
+        "measurements": 30,
+        "p50Milliseconds": 141.576,
+        "p95Milliseconds": 146.84,
+        "minimumMilliseconds": 136.377,
+        "maximumMilliseconds": 147.204,
+        "partialResponses": 0
+      },
+      {
+        "category": "phrase-short",
+        "group": "transcript",
+        "measurements": 30,
+        "p50Milliseconds": 21.963,
+        "p95Milliseconds": 22.837,
+        "minimumMilliseconds": 20.373,
+        "maximumMilliseconds": 22.845,
+        "partialResponses": 0
+      },
+      {
+        "category": "phrase-workflow",
+        "group": "transcript",
+        "measurements": 30,
+        "p50Milliseconds": 10.901,
+        "p95Milliseconds": 11.468,
+        "minimumMilliseconds": 10.158,
+        "maximumMilliseconds": 17.589,
+        "partialResponses": 0
+      },
+      {
+        "category": "multi-term",
+        "group": "transcript",
+        "measurements": 30,
+        "p50Milliseconds": 147.4,
+        "p95Milliseconds": 153.065,
+        "minimumMilliseconds": 142.597,
+        "maximumMilliseconds": 153.898,
+        "partialResponses": 0
+      },
+      {
+        "category": "mixed-metadata-content",
+        "group": "transcript",
+        "measurements": 30,
+        "p50Milliseconds": 200.317,
+        "p95Milliseconds": 209.177,
+        "minimumMilliseconds": 193.481,
+        "maximumMilliseconds": 209.748,
+        "partialResponses": 0
+      },
+      {
+        "category": "child-content",
+        "group": "transcript",
+        "measurements": 30,
+        "p50Milliseconds": 33.358,
+        "p95Milliseconds": 34.98,
+        "minimumMilliseconds": 31.876,
+        "maximumMilliseconds": 35.642,
+        "partialResponses": 0
+      },
+      {
+        "category": "file-token",
+        "group": "transcript",
+        "measurements": 30,
+        "p50Milliseconds": 26.178,
+        "p95Milliseconds": 27.258,
+        "minimumMilliseconds": 25.286,
+        "maximumMilliseconds": 27.639,
+        "partialResponses": 0
+      },
+      {
+        "category": "unicode-token",
+        "group": "transcript",
+        "measurements": 30,
+        "p50Milliseconds": 53.188,
+        "p95Milliseconds": 55.842,
+        "minimumMilliseconds": 51.571,
+        "maximumMilliseconds": 57.602,
+        "partialResponses": 0
+      },
+      {
+        "category": "guaranteed-miss",
+        "group": "transcript",
+        "measurements": 30,
+        "p50Milliseconds": 5.832,
+        "p95Milliseconds": 6.428,
+        "minimumMilliseconds": 5.382,
+        "maximumMilliseconds": 6.494,
+        "partialResponses": 0
+      }
+    ]
+  },
+  "storage": {
+    "databaseBytes": 1104351232,
+    "writeAheadLogBytes": 0,
+    "sharedMemoryBytes": 32768,
+    "totalBytes": 1104384000,
+    "checkpointTruncated": true
+  },
+  "workingSet": {
+    "beforeIndexBytes": 39149568,
+    "afterIndexBytes": 112308224,
+    "afterSearchBytes": 116027392,
+    "maximumObservedBytes": 126115840,
+    "processPeakBytes": 264167424,
+    "sampleCount": 667
+  },
+  "idleWorkingSet": {
+    "waitBeforeSamplesSeconds": 30,
+    "sampleIntervalSeconds": 5,
+    "samplesBytes": [
+      79585280,
+      79589376,
+      79060992
+    ],
+    "maximumBytes": 79589376,
+    "managedHeapSamplesBytes": [
+      1178472,
+      1186640,
+      1186640
+    ],
+    "maximumManagedHeapBytes": 1186640,
+    "gcCommittedSamplesBytes": [
+      22663168,
+      22663168,
+      22663168
+    ],
+    "maximumGcCommittedBytes": 22663168,
+    "fragmentedHeapSamplesBytes": [
+      2832,
+      2832,
+      2832
+    ],
+    "maximumFragmentedHeapBytes": 2832,
+    "postIdleQuery": {
+      "metadataCategory": "provider-claude",
+      "metadataMilliseconds": 37.249,
+      "contentCategory": "transcript-request",
+      "contentMilliseconds": 54.692,
+      "workingSetAfterQueriesBytes": 90304512
+    }
+  },
+  "responsiveness": {
+    "coverage": "process-scheduler-only-no-winforms-ui",
+    "intervalMilliseconds": 25,
+    "samples": 2171,
+    "medianDelayMilliseconds": 6.448,
+    "p95DelayMilliseconds": 7.154,
+    "maximumDelayMilliseconds": 12.556,
+    "delaysOver100Milliseconds": 0,
+    "wasCapped": false
+  },
+  "profile": {
+    "providerDiscovery": {
+      "elapsedMilliseconds": 3965.522,
+      "allocatedBytes": 854155560,
+      "workingSetGrowthBytes": 67547136
+    },
+    "providerDiscoveryBreakdown": [
+      {
+        "provider": "claude-code",
+        "calls": 1,
+        "elapsedMilliseconds": 3953.743,
+        "allocatedBytes": 854147360,
+        "workingSetGrowthBytes": 67117056
+      },
+      {
+        "provider": "codex",
+        "calls": 1,
+        "elapsedMilliseconds": 11.778,
+        "allocatedBytes": 8200,
+        "workingSetGrowthBytes": 430080
+      }
+    ],
+    "metadataPersistence": {
+      "elapsedMilliseconds": 268.478,
+      "allocatedBytes": 48872712,
+      "workingSetGrowthBytes": 8204288
+    },
+    "contentIndexing": {
+      "elapsedMilliseconds": 64000,
+      "allocatedBytes": 17559866792,
+      "workingSetGrowthBytes": -2326528
+    },
+    "providerContentReadBreakdown": [
+      {
+        "provider": "claude-code",
+        "calls": 6865,
+        "elapsedMilliseconds": 15336.22,
+        "allocatedBytes": 7555736136,
+        "workingSetGrowthBytes": 0
+      }
+    ],
+    "contentPersistence": {
+      "elapsedMilliseconds": 48663.78,
+      "allocatedBytes": 10004130656,
+      "workingSetGrowthBytes": -2326528
+    },
+    "search": {
+      "elapsedMilliseconds": 37873.997,
+      "allocatedBytes": 734564048,
+      "workingSetGrowthBytes": 3637248
+    }
+  }
+}

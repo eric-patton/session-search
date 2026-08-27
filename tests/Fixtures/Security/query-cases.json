@@ -1,0 +1,7 @@
+{
+  "maxScalars": 512,
+  "maxAtoms": 32,
+  "maxTranscriptTokens": 128,
+  "maxFtsExpressionCharacters": 4096,
+  "reservedText": ["OR", "NOT", "NEAR(foo)", "*", "title:fake", "(group)"]
+}

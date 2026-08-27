@@ -1,0 +1,12 @@
+{
+  "ResultRows": 4,
+  "DynamicIndexStatusName": "Index: Ready, 4 sessions, metadata 63 ms | Claude activity unmapped",
+  "FooterButtonNames": [
+    "Copy resume command for selected session",
+    "Open selected session in Windows Terminal"
+  ],
+  "HasSearch": true,
+  "HasResults": true,
+  "FooterStatusControlType": "ControlType.StatusBar",
+  "CwinExposesStatusLiveSetting": false
+}

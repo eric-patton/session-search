@@ -1,0 +1,14 @@
+{
+  "SelectedResultCount": 2,
+  "SelectedResultNames": [
+    "Exact tile review | Keep the command copy exact",
+    "Pinned tile repair | Make it fast and preserve <user-tag>literal markup</user-tag>"
+  ],
+  "BatchTitleExposedToUia": true,
+  "PreviewContainsOneReadyCommand": true,
+  "CopyEnabled": true,
+  "OpenEnabled": true,
+  "SessionStarEnabled": false,
+  "DirectoryStarEnabled": false,
+  "OpenNotInvoked": true
+}

@@ -1,0 +1,23 @@
+{
+  "ExpectedScaledMinimum": "1520x1040",
+  "ActualWindowWidth": 1520,
+  "ActualWindowHeight": 1040,
+  "RootPaneWidth": 1498,
+  "HeaderPaneWidth": 1486,
+  "FavoriteRailCollapsed": true,
+  "DetailPaneCollapsed": true,
+  "ResultsWidth": 1486,
+  "Controls": [
+    { "Name": "Index status", "Present": true, "FullyInsideWindow": true, "Right": 1503, "Bottom": 177 },
+    { "Name": "Search all indexed sessions", "Present": true, "FullyInsideWindow": true, "Right": 467, "Bottom": 226 },
+    { "Name": "Provider and favorite scope", "Present": true, "FullyInsideWindow": true, "Right": 767, "Bottom": 214 },
+    { "Name": "Previous result page", "Present": true, "FullyInsideWindow": true, "Right": 999, "Bottom": 259 },
+    { "Name": "Next result page", "Present": true, "FullyInsideWindow": true, "Right": 1187, "Bottom": 259 },
+    { "Name": "Rescan provider sessions", "Present": true, "FullyInsideWindow": true, "Right": 1503, "Bottom": 259 },
+    { "Name": "Indexed session results", "Present": true, "FullyInsideWindow": true, "Right": 1543, "Bottom": 963 },
+    { "Name": "Copy resume command for selected session", "Present": true, "FullyInsideWindow": true, "Right": 1235, "Bottom": 1051 },
+    { "Name": "Open selected session in Windows Terminal", "Present": true, "FullyInsideWindow": true, "Right": 1519, "Bottom": 1051 }
+  ],
+  "EssentialControlsInsideWindow": true,
+  "ResponsiveCollapsePassed": true
+}

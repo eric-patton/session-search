@@ -1,0 +1,12 @@
+{
+  "Shortcut": "Ctrl+D",
+  "BeforeFavoriteDirectories": [],
+  "AfterFavoriteDirectories": [
+    "C:\\repos\\fixture"
+  ],
+  "FavoriteAdded": true,
+  "SelectionAndDetailPreservedAfterToggle": true,
+  "DownAfterToggleMovedSelectionToArchived": true,
+  "UpRestoredPinnedSelection": true,
+  "FocusPreservedByKeyboardProof": true
+}

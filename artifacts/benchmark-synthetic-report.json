@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "runtimeVersion": ".NET 10.0.8",
+  "processArchitecture": "X64",
+  "logicalProcessorCount": 32,
+  "index": {
+    "discoveredSessions": 4,
+    "completedSessions": 4,
+    "changedSources": 6,
+    "firstMetadataMilliseconds": 43.85,
+    "completionMilliseconds": 94,
+    "isPartial": false
+  },
+  "search": {
+    "warmupIterationsPerCategory": 3,
+    "measuredIterationsPerCategory": 30,
+    "totalMeasurements": 180,
+    "p50Milliseconds": 1.403,
+    "p95Milliseconds": 2.07,
+    "categories": [
+      {
+        "category": "recent-browse",
+        "measurements": 30,
+        "p50Milliseconds": 0.546,
+        "p95Milliseconds": 0.635,
+        "minimumMilliseconds": 0.488,
+        "maximumMilliseconds": 0.736,
+        "partialResponses": 0
+      },
+      {
+        "category": "common-metadata-term",
+        "measurements": 30,
+        "p50Milliseconds": 1.413,
+        "p95Milliseconds": 1.525,
+        "minimumMilliseconds": 1.257,
+        "maximumMilliseconds": 1.709,
+        "partialResponses": 0
+      },
+      {
+        "category": "common-transcript-term",
+        "measurements": 30,
+        "p50Milliseconds": 1.5,
+        "p95Milliseconds": 1.72,
+        "minimumMilliseconds": 1.222,
+        "maximumMilliseconds": 1.765,
+        "partialResponses": 0
+      },
+      {
+        "category": "phrase",
+        "measurements": 30,
+        "p50Milliseconds": 1.425,
+        "p95Milliseconds": 1.641,
+        "minimumMilliseconds": 1.188,
+        "maximumMilliseconds": 1.681,
+        "partialResponses": 0
+      },
+      {
+        "category": "multi-term",
+        "measurements": 30,
+        "p50Milliseconds": 1.969,
+        "p95Milliseconds": 2.274,
+        "minimumMilliseconds": 1.856,
+        "maximumMilliseconds": 2.422,
+        "partialResponses": 0
+      },
+      {
+        "category": "guaranteed-miss",
+        "measurements": 30,
+        "p50Milliseconds": 1.298,
+        "p95Milliseconds": 1.423,
+        "minimumMilliseconds": 1.156,
+        "maximumMilliseconds": 1.594,
+        "partialResponses": 0
+      }
+    ]
+  },
+  "storage": {
+    "databaseBytes": 86016,
+    "writeAheadLogBytes": 0,
+    "sharedMemoryBytes": 32768,
+    "totalBytes": 118784,
+    "checkpointTruncated": true
+  },
+  "workingSet": {
+    "beforeIndexBytes": 38707200,
+    "afterIndexBytes": 48033792,
+    "afterSearchBytes": 61583360,
+    "maximumObservedBytes": 61919232,
+    "processPeakBytes": 61919232,
+    "sampleCount": 183
+  },
+  "indexRetained": false
+}

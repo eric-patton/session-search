@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\SessionSearch.Core\SessionSearch.Core.csproj" />
+    <ProjectReference Include="..\..\src\SessionSearch.Infrastructure\SessionSearch.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="query-manifest.json"
+                      LogicalName="SessionSearch.Benchmarks.query-manifest.json" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <ServerGarbageCollection>false</ServerGarbageCollection>
+    <RetainVMGarbageCollection>false</RetainVMGarbageCollection>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <RuntimeHostConfigurationOption Include="System.GC.ConserveMemory" Value="7" />
+  </ItemGroup>
+
+</Project>

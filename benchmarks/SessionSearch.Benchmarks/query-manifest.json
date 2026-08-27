@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "queries": [
+    { "category": "recent-browse", "group": "browse", "query": "" },
+    { "category": "provider-claude", "group": "metadata", "query": "claude code" },
+    { "category": "provider-codex", "group": "metadata", "query": "codex" },
+    { "category": "title-common", "group": "metadata", "query": "project" },
+    { "category": "title-prefix", "group": "metadata", "query": "implem" },
+    { "category": "identifier-prefix", "group": "metadata", "query": "00000000" },
+    { "category": "directory-drive", "group": "metadata", "query": "c:" },
+    { "category": "directory-component", "group": "metadata", "query": "repos" },
+    { "category": "branch-common", "group": "metadata", "query": "main" },
+    { "category": "model-common", "group": "metadata", "query": "sonnet" },
+    { "category": "transcript-request", "group": "transcript", "query": "please" },
+    { "category": "transcript-help", "group": "transcript", "query": "help" },
+    { "category": "transcript-error", "group": "transcript", "query": "error" },
+    { "category": "transcript-code", "group": "transcript", "query": "class" },
+    { "category": "phrase-short", "group": "transcript", "query": "\"help me\"" },
+    { "category": "phrase-workflow", "group": "transcript", "query": "\"please help\"" },
+    { "category": "multi-term", "group": "transcript", "query": "please help" },
+    { "category": "mixed-metadata-content", "group": "transcript", "query": "project help" },
+    { "category": "child-content", "group": "transcript", "query": "subagent" },
+    { "category": "file-token", "group": "transcript", "query": "build.ps1" },
+    { "category": "unicode-token", "group": "transcript", "query": "resume" },
+    { "category": "guaranteed-miss", "group": "transcript", "query": "zzqvbenchmarknomatch7391" }
+  ]
+}

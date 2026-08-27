@@ -1,0 +1,19 @@
+{
+  "algorithm": "SHA-256",
+  "files": [
+    { "path": "Claude/expected.json", "bytes": 343, "sha256": "08e75268c9e42fcfd58a5694a62fc0ad387677ec4a1bec4b48671c9252f4b1d3" },
+    { "path": "Claude/projects/-C-repos-fixture/11111111-1111-1111-1111-111111111111.jsonl", "bytes": 2244, "sha256": "ff43ac9179812005c22bdd6908d0ffe2e7ef4f1b5a9846ae4292510e663942af" },
+    { "path": "Claude/projects/-C-repos-fixture/11111111-1111-1111-1111-111111111111/subagents/agent-alpha.jsonl", "bytes": 851, "sha256": "f46ec8a757a7119ff3351df47bcf96336ace9e70f2345068e2ca15933b9f696c" },
+    { "path": "Claude/projects/-C-repos-fixture/11111111-1111-1111-1111-111111111111/subagents/agent-alpha.meta.json", "bytes": 67, "sha256": "7898cb6e7d4d038bdac39d71aeafec8c1cb72cee8dd0433a0ac0a4b138469525" },
+    { "path": "Claude/projects/-C-repos-fixture/11111111-1111-1111-1111-111111111111/subagents/workflows/wf_fixture/agent-beta.jsonl", "bytes": 474, "sha256": "bac456d30073dcc4240edfd2c7cdb559397bb972d5ecbf968033643fec3c8dfe" },
+    { "path": "Claude/projects/-C-repos-fixture/11111111-1111-1111-1111-111111111111/subagents/workflows/wf_fixture/journal.jsonl", "bytes": 92, "sha256": "0856a24504316a3615ff44692d621a302fdb1c0341575cc43486532b2567cb2c" },
+    { "path": "Claude/projects/-C-repos-fixture/22222222-2222-2222-2222-222222222222.jsonl", "bytes": 449, "sha256": "4026f59859aa1844cd54c9493e659caf61e8d2bcfb23c0a9fce934316d2c2c18" },
+    { "path": "Claude/sessions/4242.json", "bytes": 204, "sha256": "75231397e9efe3b0e45fea059de95c4477bffe41b51f32f56bb72bd67996f607" },
+    { "path": "Codex/archived_sessions/rollout-2026-08-20T09-00-00-cccccccc-cccc-cccc-cccc-cccccccccccc.jsonl", "bytes": 489, "sha256": "32efbab643f34d4299bb2e8fb239cec9aaf6d601008fc91fe027b85877748a05" },
+    { "path": "Codex/expected.json", "bytes": 341, "sha256": "fedd47e8407408d8d5b9a57bf51ac4461b6fbfce0b61349fdcf878d8068e5d43" },
+    { "path": "Codex/session_index.jsonl", "bytes": 158, "sha256": "ad02eb03b0174bfcc022e3ae4682aab7265a076af09ec6e3940ca469e80c20a8" },
+    { "path": "Codex/sessions/2026/08/26/rollout-2026-08-26T10-00-00-aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa.jsonl", "bytes": 1349, "sha256": "514e6a77591827f005bfa9d21e39c046139235704082d31e1cf9dcc902442a82" },
+    { "path": "Codex/sessions/2026/08/26/rollout-2026-08-26T10-05-00-bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb.jsonl", "bytes": 1181, "sha256": "69bf12cf34dc88c3fef0ba91f36bc99845b3df57e8286733e8a3bf7e0614e383" },
+    { "path": "Codex/state-schema.sql", "bytes": 467, "sha256": "edf2a4d2251e337e51c8c6f9543a91ba46e12e72a4abe488ad3eab15dad726a8" }
+  ]
+}

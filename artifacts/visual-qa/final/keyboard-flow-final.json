@@ -1,0 +1,11 @@
+{
+  "Shortcut": "Ctrl+L",
+  "Query": "copper nebula",
+  "SearchResultRows": 1,
+  "DownSelectedExpectedResult": true,
+  "EscapeRestoredRows": 4,
+  "TypedWithoutRefocus": "tile",
+  "RowsAfterTypingWithoutRefocus": 2,
+  "EscapeFocusReturnProved": true,
+  "FinalRowsAfterSecondEscape": 4
+}

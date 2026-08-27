@@ -1,0 +1,11 @@
+**/bin/
+**/obj/
+.vs/
+*.user
+*.suo
+TestResults/
+artifacts/release/
+artifacts/benchmarks/*.sqlite*
+artifacts/benchmarks/*-wal
+artifacts/benchmarks/*-shm
+artifacts/visual-qa/*.png

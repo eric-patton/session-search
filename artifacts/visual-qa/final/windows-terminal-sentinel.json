@@ -1,0 +1,16 @@
+{
+  "TrustedPackageResolved": true,
+  "TrustedPublisher": "Microsoft Corporation",
+  "PackageBinaryRecognized": true,
+  "BaselineTabCount": 2,
+  "AfterOpenTabCount": 3,
+  "ExactlyOneTabAdded": true,
+  "UniqueSentinelTabCount": 1,
+  "WorkingDirectoryMatched": true,
+  "ShellAliveBeforeClose": true,
+  "ExistingWindowReused": true,
+  "FinalTabCount": 2,
+  "UniqueSentinelGone": true,
+  "BaselineRestored": true,
+  "ShellExitedAfterClose": true
+}

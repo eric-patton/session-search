@@ -1,0 +1,7 @@
+{"timestamp":"2026-08-26T10:00:00.000Z","type":"session_meta","payload":{"id":"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa","timestamp":"2026-08-26T10:00:00.000Z","cwd":"C:\\repos\\fixture","originator":"codex_cli_rs","cli_version":"0.149.1","source":"cli","model_provider":"openai","session_id":"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa","git":{"branch":"main"}}}
+{"timestamp":"2026-08-26T10:00:01.000Z","type":"event_msg","payload":{"type":"user_message","message":"Review the tile cache error","text_elements":[]}}
+{"timestamp":"2026-08-26T10:00:02.000Z","type":"response_item","payload":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"The cache error comes from a stale path."}]}}
+{"timestamp":"2026-08-26T10:00:03.000Z","type":"response_item","payload":{"type":"function_call","name":"exec_command","arguments":"{\"cmd\":\"dotnet test\"}","call_id":"call_fixture"}}
+{"timestamp":"2026-08-26T10:00:04.000Z","type":"response_item","payload":{"type":"function_call_output","call_id":"call_fixture","output":"Build succeeded"}}
+{"timestamp":"2026-08-26T10:00:05.000Z","type":"event_msg","payload":{"type":"agent_message","message":"The cache error comes from a stale path."}}
+{"timestamp":"2026-08-26T10:00:06.000Z","type":"event_msg","payload":{"type":"user_message","message":"Keep the command copy exact","text_elements":[]}}

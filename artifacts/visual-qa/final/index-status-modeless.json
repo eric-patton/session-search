@@ -1,0 +1,12 @@
+{
+  "MainWindowEnabledWhileStatusOpen": true,
+  "StatusWindowEnabled": true,
+  "MainSearchAcceptedValueWhileStatusOpen": true,
+  "SearchResultRowsWhileStatusOpen": 2,
+  "StatusStillOpenAfterMainInteraction": true,
+  "StatusAccessibleNamesPresent": [
+    "Index health and diagnostics",
+    "Close index status",
+    "Rescan session sources"
+  ]
+}

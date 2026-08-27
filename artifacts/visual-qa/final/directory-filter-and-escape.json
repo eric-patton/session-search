@@ -1,0 +1,36 @@
+{
+  "Scoped": {
+    "Search": "command copy",
+    "Rows": [
+      "Exact tile review | Keep the command copy exact"
+    ],
+    "FavoritesSelected": [
+      "C:\\repos\\fixture"
+    ]
+  },
+  "DirectoryFilterRetainedQuery": true,
+  "ScopedResultCorrect": true,
+  "FirstEscape": {
+    "Search": "command copy",
+    "Rows": [
+      "Exact tile review | Keep the command copy exact"
+    ],
+    "FavoritesSelected": [
+      "All directories"
+    ]
+  },
+  "FirstEscapeClearedOnlyDirectory": true,
+  "SecondEscape": {
+    "Search": "",
+    "Rows": [
+      "22222222-2222-2222-2222-222222222222",
+      "Exact tile review | Keep the command copy exact",
+      "Pinned tile repair | Make it fast and preserve <user-tag>literal markup</user-tag>",
+      "Archived fixture request | Archived fixture request"
+    ],
+    "FavoritesSelected": [
+      "All directories"
+    ]
+  },
+  "SecondEscapeClearedQuery": true
+}

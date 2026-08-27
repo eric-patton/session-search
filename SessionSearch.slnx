@@ -1,0 +1,16 @@
+<Solution>
+  <Folder Name="/benchmarks/">
+    <Project Path="benchmarks/SessionSearch.Benchmarks/SessionSearch.Benchmarks.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/SessionSearch.App/SessionSearch.App.csproj" />
+    <Project Path="src/SessionSearch.Core/SessionSearch.Core.csproj" />
+    <Project Path="src/SessionSearch.Infrastructure/SessionSearch.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/SessionSearch.AcceptanceTests/SessionSearch.AcceptanceTests.csproj" />
+    <Project Path="tests/SessionSearch.Core.Tests/SessionSearch.Core.Tests.csproj" />
+    <Project Path="tests/SessionSearch.IntegrationTests/SessionSearch.IntegrationTests.csproj" />
+    <Project Path="tests/SessionSearch.Provider.Tests/SessionSearch.Provider.Tests.csproj" />
+  </Folder>
+</Solution>

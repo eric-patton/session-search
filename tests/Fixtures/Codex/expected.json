@@ -1,0 +1,10 @@
+{
+  "provider": "Codex",
+  "sessionId": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+  "title": "Exact tile review",
+  "description": "Keep the command copy exact",
+  "directory": "C:\\repos\\fixture",
+  "branch": "main",
+  "childSessionId": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+  "archivedSessionId": "cccccccc-cccc-cccc-cccc-cccccccccccc"
+}

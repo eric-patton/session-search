@@ -1,0 +1,20 @@
+{
+  "PreviewMatchesExpected": true,
+  "CopyEnabled": true,
+  "OpenEnabled": true,
+  "TerminalResolutionFixedInApp": true,
+  "IndexAccessibleName": "Index: Ready, 4 sessions, metadata 63 ms | Claude activity unmapped",
+  "IdentityLinesVisible": [
+    "ID",
+    "Created",
+    "Updated",
+    "Model",
+    "Branch",
+    "Source size"
+  ],
+  "AllSixIdentityLinesVisible": true,
+  "DynamicAccessibleTextPresent": true,
+  "CwinExposesStatusLiveSetting": false,
+  "AppOpenNotInvoked": true,
+  "AppOpenNotInvokedReason": "QA charter forbids invoking Claude or Codex"
+}

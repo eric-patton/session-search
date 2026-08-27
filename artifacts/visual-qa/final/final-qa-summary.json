@@ -1,0 +1,36 @@
+{
+  "ReleaseBuild": {
+    "Succeeded": true,
+    "Warnings": 0,
+    "Errors": 0,
+    "Executable": "SessionSearch.exe"
+  },
+  "Passed": [
+    "Normal 100 percent layout and selected details",
+    "All six technical identity lines visible",
+    "Exact command preview and enabled Copy and Open controls",
+    "Ctrl+L search, Down selection, Escape clear, and focus return",
+    "Modeless Index status and Enter focus-return proof",
+    "Ctrl+D directory favorite with selection, detail, and focus preservation",
+    "Two-row multi-selection controls",
+    "Forced high contrast",
+    "100 percent narrow collapse",
+    "200 percent full-size geometry",
+    "200 percent scaled-minimum collapse",
+    "Trusted packaged Windows Terminal resolution",
+    "Harmless real Windows Terminal one-tab sentinel with cwd proof and baseline restoration"
+  ],
+  "Safety": {
+    "ClaudeOrCodexInvoked": false,
+    "AppOpenActionInvoked": false,
+    "ExistingTerminalTabsPreserved": true,
+    "SessionSearchProcessesRemaining": 0,
+    "SyntheticRuntimeRemoved": true,
+    "CleanupRecovery": "Recycle Bin"
+  },
+  "ValidationLimits": [
+    "cwin exposes the footer as ControlType.StatusBar with live text but does not expose the UIA LiveSetting property",
+    "The Index status AutoEllipsis is intentional and the full text remains available through its accessible name"
+  ],
+  "RemainingDesignDiscrepancy": "Collapsed narrow panes do not expose the toolbar or details drawer alternatives described by design.md"
+}
