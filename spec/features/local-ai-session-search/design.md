@@ -46,10 +46,10 @@ list as the dominant surface.
 | Search sessions, directories, prompts, errors...      Claude Codex  Index |
 +---------------+------------------------------------------+---------------+
 | RECENT        | AGE  SESSION                     DIRECTORY| DETAILS       |
-| STARRED       | now  Claude  Fix tile loading    dtak... | title         |
+| STARRED       | now  Claude  Fix tile loading    loom... | title         |
 | DIRECTORIES   | 18m  Codex   Review drag input   todo    | last request  |
-|  dtak         | 2h   Claude  Package promotion   Reviews | path, branch  |
-|  pulse        | 1d   Codex   Browser contrast    ursin   | match, model  |
+|  loom         | 2h   Claude  Package promotion   Reviews | path, branch  |
+|  shelf        | 1d   Codex   Browser contrast    ursin   | match, model  |
 |               |                                          | command       |
 +---------------+------------------------------------------+---------------+
 | 3 selected                         Open 3 tabs  Copy commands             |

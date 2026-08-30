@@ -120,3 +120,29 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\publish.ps1 -Versi
 The publish script refuses to reuse an existing version folder and scans the completed folder before reporting success.
 
 The benchmark harness requires explicit absolute provider roots, a new isolated data directory under LocalAppData, and a sanitized JSON output path. It always removes its SQLite database, WAL, SHM, and journal files. Run `SessionSearch.Benchmarks --help` for the guarded command surface.
+
+## Building and testing
+
+```powershell
+dotnet build
+```
+
+The test projects are xunit.v3, which builds each of them as an executable that runs on
+Microsoft.Testing.Platform rather than under VSTest. Run them directly:
+
+```powershell
+dotnet run --project tests/SessionSearch.Core.Tests
+dotnet run --project tests/SessionSearch.Provider.Tests
+dotnet run --project tests/SessionSearch.IntegrationTests
+dotnet run --project tests/SessionSearch.AcceptanceTests
+```
+
+187 tests across the four projects. `dotnet test` is not the entry point here and reports
+"Zero tests ran" with exit code 5, because it looks for a VSTest adapter these projects
+deliberately do not carry.
+
+Benchmarks live in `benchmarks/SessionSearch.Benchmarks` and are run the same way.
+
+## License
+
+[MIT](LICENSE).

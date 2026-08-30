@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    # A WinForms desktop app that reads Windows provider storage and launches Windows
+    # Terminal, so there is no meaningful Linux job to run.
+    name: Build and test
+    runs-on: windows-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Restore
+        run: dotnet restore --locked-mode
+
+      - name: Build
+        run: dotnet build --no-restore -c Release
+
+      # xunit.v3 test projects build as executables on Microsoft.Testing.Platform, so they
+      # are run rather than handed to `dotnet test`, which would find no VSTest adapter and
+      # report zero tests while passing.
+      - name: Core tests
+        run: dotnet run --project tests/SessionSearch.Core.Tests --no-build -c Release
+
+      - name: Provider tests
+        run: dotnet run --project tests/SessionSearch.Provider.Tests --no-build -c Release
+
+      - name: Integration tests
+        run: dotnet run --project tests/SessionSearch.IntegrationTests --no-build -c Release
+
+  acceptance:
+    # Split out because these drive the real WinForms window, so they are the ones most
+    # likely to be affected by the runner's desktop rather than by a change in the code.
+    name: Acceptance tests
+    runs-on: windows-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Restore
+        run: dotnet restore --locked-mode
+
+      - name: Build
+        run: dotnet build --no-restore -c Release
+
+      - name: Acceptance tests
+        run: dotnet run --project tests/SessionSearch.AcceptanceTests --no-build -c Release
