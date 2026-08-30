@@ -1,0 +1,6 @@
+# The synthetic session corpus is fingerprinted by exact byte count and SHA-256 in
+# tests/Fixtures/integrity-manifest.json, and an acceptance test asserts the corpus is
+# byte-identical before and after a full workflow. Line-ending translation on checkout
+# changes those bytes, so the check passes only on a machine whose checkout happens to
+# match the one that recorded it. Never translate anything under the fixture corpus.
+tests/Fixtures/** -text
